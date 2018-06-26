@@ -14,8 +14,19 @@ The Project consists out of the following libraries:
 
 ### General
 - Creating a list of anti-debugging, anti-reversing and anti-vm features
+ - https://github.com/LordNoteworthy/al-khaser
+ - https://github.com/a0rtega/pafish
+ - CRC/hash/integrity checks
 - Choose and implement encryption methods
+ - XOR?
+ - RC4?
+ - (X)TEA?
+ - AES?
 - Choose and implement compression methods
+ - LMZA?
+ - QuickLZ?
+ - LZ4?
+ - zlib?
 - Implementing wrappers for .NET loading
 - Writing code specific for building a stub and including a target
 - GUI/CLI for choosing build options
