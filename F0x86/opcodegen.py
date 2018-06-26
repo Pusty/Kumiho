@@ -1,0 +1,16 @@
+baseOP = 0x38
+name = "CMP"
+print("#       == %s ==        " % (name.strip()))
+print("   %02X /r   ;%s rmb,rb" % (baseOP, name))
+print("RW %02X /r   ;%s rmw,rw" % (baseOP+1, name))
+print("   %02X /r   ;%s rmd,rd" % (baseOP+1, name))
+print("RQ %02X /r   ;%s rmq,rq" % (baseOP+1, name))
+print("   %02X /r   ;%s rb,rmb" % (baseOP+2, name))
+print("RW %02X /r   ;%s rw,rmw" % (baseOP+3, name))
+print("   %02X /r   ;%s rd,rmd" % (baseOP+3, name))
+print("RQ %02X /r   ;%s rq,rmq" % (baseOP+3, name))
+print("   %02X ib   ;%s AL, ib" % (baseOP+4, name))
+print("RW %02X iw   ;%s AX, iw" % (baseOP+5, name))
+print("   %02X id   ;%s EAX,id" % (baseOP+5, name))
+print("RQ %02X id   ;%s RAX,id" % (baseOP+5, name))
+print("#    == END OF %s ==    " % (name.strip()))

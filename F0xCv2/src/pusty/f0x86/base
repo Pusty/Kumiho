@@ -1,0 +1,888 @@
+#REX: RW = 66, RQ = 48
+#ib,iw,id,iq = immediate byte/word/dword/qword
+#/0 Immediate Encoding (0 means 0st immediate command)
+#/r MOD-REG-R/M Encoding
+#rmb/rmw/rmd/rmq register/displacement byte/word/dword/qword
+#rb/rw/rd/rq register byte/word/dword/qword
+
+#      == ADD ==
+#ADD <rmx> <rmx>
+   00 /r   ;ADD rmb,rb
+RW 01 /r   ;ADD rmw,rw
+   01 /r   ;ADD rmd,rd
+RQ 01 /r   ;ADD rmq,rq
+   02 /r   ;ADD rb,rmb
+RW 03 /r   ;ADD rw,rmw
+   03 /r   ;ADD rd,rmd
+RQ 03 /r   ;ADD rq,rmq
+#ADD <al/ax/eax/rax> immediate
+   04 ib   ;ADD AL, ib
+RW 05 iw   ;ADD AX, iw
+   05 id   ;ADD EAX,id
+RQ 05 id   ;ADD RAX,id
+#   ==END OF ADD ==
+
+#      == OR ==
+   08 /r   ;OR  rmb,rb
+RW 09 /r   ;OR  rmw,rw
+   09 /r   ;OR  rmd,rd
+RQ 09 /r   ;OR  rmq,rq
+   0A /r   ;OR  rb,rmb
+RW 0B /r   ;OR  rw,rmw
+   0B /r   ;OR  rd,rmd
+RQ 0B /r   ;OR  rq,rmq
+   0C ib   ;OR  AL, ib
+RW 0D iw   ;OR  AX, iw
+   0D id   ;OR  EAX,id
+RQ 0D id   ;OR  RAX,id
+#   == END OF OR ==
+
+#       == ADC ==
+   10 /r   ;ADC rmb,rb
+RW 11 /r   ;ADC rmw,rw
+   11 /r   ;ADC rmd,rd
+RQ 11 /r   ;ADC rmq,rq
+   12 /r   ;ADC rb,rmb
+RW 13 /r   ;ADC rw,rmw
+   13 /r   ;ADC rd,rmd
+RQ 13 /r   ;ADC rq,rmq
+   14 ib   ;ADC AL, ib
+RW 15 iw   ;ADC AX, iw
+   15 id   ;ADC EAX,id
+RQ 15 id   ;ADC RAX,id
+#    == END OF ADC ==
+
+#       == SBB ==
+   18 /r   ;SBB rmb,rb
+RW 19 /r   ;SBB rmw,rw
+   19 /r   ;SBB rmd,rd
+RQ 19 /r   ;SBB rmq,rq
+   1A /r   ;SBB rb,rmb
+RW 1B /r   ;SBB rw,rmw
+   1B /r   ;SBB rd,rmd
+RQ 1B /r   ;SBB rq,rmq
+   1C ib   ;SBB AL, ib
+RW 1D iw   ;SBB AX, iw
+   1D id   ;SBB EAX,id
+RQ 1D id   ;SBB RAX,id
+#    == END OF SBB ==
+
+#       == AND ==
+   20 /r   ;AND rmb,rb
+RW 21 /r   ;AND rmw,rw
+   21 /r   ;AND rmd,rd
+RQ 21 /r   ;AND rmq,rq
+   22 /r   ;AND rb,rmb
+RW 23 /r   ;AND rw,rmw
+   23 /r   ;AND rd,rmd
+RQ 23 /r   ;AND rq,rmq
+   24 ib   ;AND AL, ib
+RW 25 iw   ;AND AX, iw
+   25 id   ;AND EAX,id
+RQ 25 id   ;AND RAX,id
+#    == END OF AND ==
+   27      ;DAA AL
+   27      ;DAA
+#       == SUB ==
+   28 /r   ;SUB rmb,rb
+RW 29 /r   ;SUB rmw,rw
+   29 /r   ;SUB rmd,rd
+RQ 29 /r   ;SUB rmq,rq
+   2A /r   ;SUB rb,rmb
+RW 2B /r   ;SUB rw,rmw
+   2B /r   ;SUB rd,rmd
+RQ 2B /r   ;SUB rq,rmq
+   2C ib   ;SUB AL, ib
+RW 2D iw   ;SUB AX, iw
+   2D id   ;SUB EAX,id
+RQ 2D id   ;SUB RAX,id
+#    == END OF SUB ==
+   2F      ;DAS AL
+   2F      ;DAS
+#       == XOR ==
+   30 /r   ;XOR rmb,rb
+RW 31 /r   ;XOR rmw,rw
+   31 /r   ;XOR rmd,rd
+RQ 31 /r   ;XOR rmq,rq
+   32 /r   ;XOR rb,rmb
+RW 33 /r   ;XOR rw,rmw
+   33 /r   ;XOR rd,rmd
+RQ 33 /r   ;XOR rq,rmq
+   34 ib   ;XOR AL, ib
+RW 35 iw   ;XOR AX, iw
+   35 id   ;XOR EAX,id
+RQ 35 id   ;XOR RAX,id
+#    == END OF XOR ==
+   37      ;AAA AL,AH
+   37      ;AAA
+#       == CMP ==
+   38 /r   ;CMP rmb,rb
+RW 39 /r   ;CMP rmw,rw
+   39 /r   ;CMP rmd,rd
+RQ 39 /r   ;CMP rmq,rq
+   3A /r   ;CMP rb,rmb
+RW 3B /r   ;CMP rw,rmw
+   3B /r   ;CMP rd,rmd
+RQ 3B /r   ;CMP rq,rmq
+   3C ib   ;CMP AL, ib
+RW 3D iw   ;CMP AX, iw
+   3D id   ;CMP EAX,id
+RQ 3D id   ;CMP RAX,id
+#    == END OF CMP ==
+   3F      ;AAS AL,AH
+   3F      ;AAS
+
+#32 bit only
+#INC 40+r
+#      == INC 32bit only ==
+RW 40      ;INC AX
+RW 41      ;INC CX
+RW 42      ;INC DX
+RW 43      ;INC BX
+RW 44      ;INC SP
+RW 45      ;INC BP
+RW 46      ;INC SI
+RW 47      ;INC DI
+   40      ;INC EAX
+   41      ;INC ECX
+   42      ;INC EDX
+   43      ;INC EBX
+   44      ;INC ESP
+   45      ;INC EBP
+   46      ;INC ESI
+   47      ;INC EDI
+#    == END OF INC 32bit only ==
+#32 bit only
+#DEC 48+r
+#      == DEC 32bit only ==
+RW 48      ;DEC AX
+RW 49      ;DEC CX
+RW 4A      ;DEC DX
+RW 4B      ;DEC BX
+RW 4C      ;DEC SP
+RW 4D      ;DEC BP
+RW 4E      ;DEC SI
+RW 4F      ;DEC DI
+   48      ;DEC EAX
+   49      ;DEC ECX
+   4A      ;DEC EDX
+   4B      ;DEC EBX
+   4C      ;DEC ESP
+   4D      ;DEC EBP
+   4E      ;DEC ESI
+   4F      ;DEC EDI
+#    == END OF DEC 32bit only ==
+
+#      == PUSH ==
+RW 50      ;PUSH AX
+RW 51      ;PUSH CX
+RW 52      ;PUSH DX
+RW 53      ;PUSH BX
+RW 54      ;PUSH SP
+RW 55      ;PUSH BP
+RW 56      ;PUSH SI
+RW 57      ;PUSH DI
+   50      ;PUSH EAX
+   51      ;PUSH ECX
+   52      ;PUSH EDX
+   53      ;PUSH EBX
+   54      ;PUSH ESP
+   55      ;PUSH EBP
+   56      ;PUSH ESI
+   57      ;PUSH EDI
+   50      ;PUSH RAX
+   51      ;PUSH RCX
+   52      ;PUSH RDX
+   53      ;PUSH RBX
+   54      ;PUSH RSP
+   55      ;PUSH RBP
+   56      ;PUSH RSI
+   57      ;PUSH RDI
+#    == END OF PUSH ==
+
+#      == POP ==
+RW 58      ;POP AX
+RW 59      ;POP CX
+RW 5A      ;POP DX
+RW 5B      ;POP BX
+RW 5C      ;POP SP
+RW 5D      ;POP BP
+RW 5E      ;POP SI
+RW 5F      ;POP DI
+   58      ;POP EAX
+   59      ;POP ECX
+   5A      ;POP EDX
+   5B      ;POP EBX
+   5C      ;POP ESP
+   5D      ;POP EBP
+   5E      ;POP ESI
+   5F      ;POP EDI
+   58      ;POP RAX
+   59      ;POP RCX
+   5A      ;POP RDX
+   5B      ;POP RBX
+   5C      ;POP RSP
+   5D      ;POP RBP
+   5E      ;POP RSI
+   5F      ;POP RDI
+#    == END OF POP ==
+
+#Utility Pushes and Pops
+   06      ;PUSH ES
+   07      ;POP  ES
+   0E      ;PUSH CS
+   16      ;PUSH SS
+   17      ;POP  SS
+   1E      ;PUSH DS
+   1F      ;POP  DS
+   60      ;PUSHA
+   60      ;PUSHAD
+   61      ;POPA
+   61      ;POPAD
+#   ==END OF UTIL ==
+
+#BOUND HERE TODO CUZ I DON'T UNDERSTAND
+#32bit only
+   63 /r   ;ARPL rmw,rw
+#64bit only
+   63 /r   ;MOVSXD rd, rmd
+   63 /r   ;MOVSXD rq, rmd
+#end only
+
+RW 68 iw   ;PUSH iw
+   68 id   ;PUSH id
+   6A ib   ;PUSH ib
+   
+RW 69 /r iw;IMUL rw, rmw, iw
+   69 /r id;IMUL rd, rmd, id
+RQ 69 /r id;IMUL rq, rmq, id
+RW 6B /r ib;IMUL rw, rmw, ib
+   6B /r ib;IMUL rd, rmd, ib
+RQ 6B /r ib;IMUL rq, rmq, ib
+
+   6C      ;INS rmb
+   6C      ;INS rmb, rmb
+   6C      ;INSB
+RW 6D      ;INS rmw
+RW 6D      ;INS rmw, rmw
+RW 6D      ;INSW
+   6D      ;INS rmd
+   6D      ;INS rmd, rmd
+   6D      ;INSD
+
+   6E      ;OUTS rmb
+   6E      ;OUTS rmb, rmb
+   6E      ;OUTSB
+RW 6F      ;OUTS rmw
+RW 6F      ;OUTS rmw, rmw
+RW 6F      ;OUTSW
+   6F      ;OUTS rmd
+   6F      ;OUTS rmd, rmd
+   6F      ;OUTSD
+
+#      == JUMPS ==
+   70 ib   ;JO ib
+   71 ib   ;JNO ib
+   72 ib   ;JB ib
+   72 ib   ;JNAE ib
+   72 ib   ;JC ib
+   73 ib   ;JNB ib
+   73 ib   ;JAE ib
+   73 ib   ;JNC ib 
+   74 ib   ;JZ ib
+   74 ib   ;JE ib
+   75 ib   ;JNZ ib
+   75 ib   ;JNE ib
+   76 ib   ;JBE ib
+   76 ib   ;JNA ib
+   77 ib   ;JNBE ib
+   77 ib   ;JA ib
+   78 ib   ;JS ib
+   79 ib   ;JNS ib
+   7A ib   ;JP ib
+   7A ib   ;JPE ib
+   7B ib   ;JNP ib
+   7B ib   ;JPO ib
+   7C ib   ;JL ib
+   7C ib   ;JNGE ib
+   7D ib   ;JNL ib
+   7D ib   ;JGE ib
+   7E ib   ;JLE ib
+   7E ib   ;JNG ib
+   7F ib   ;JNLE ib
+   7F ib   ;JG ib
+#      == END OF JUMPS ==
+#      == START OF <r8/r16/r32/r64> immediate ==
+   80 /0 ib;ADD rmb,ib
+   80 /1 ib;OR  rmb,ib
+   80 /2 ib;ADC rmb,ib
+   80 /3 ib;SBB rmb,ib
+   80 /4 ib;AND rmb,ib
+   80 /5 ib;SUB rmb,ib
+   80 /6 ib;XOR rmb,ib
+   80 /7 ib;CMP rmb,ib
+RW 81 /0 iw;ADD rmw,iw
+   81 /0 id;ADD rmd,id
+RQ 81 /0 id;ADD rmq,id
+RW 81 /1 iw;OR  rmw,iw
+   81 /1 id;OR  rmd,id
+RQ 81 /1 id;OR  rmq,id
+RW 81 /2 iw;ADC rmw,iw
+   81 /2 id;ADC rmd,id
+RQ 81 /2 id;ADC rmq,id
+RW 81 /3 iw;SBB rmw,iw
+   81 /3 id;SBB rmd,id
+RQ 81 /3 id;SBB rmq,id
+RW 81 /4 iw;AND rmw,iw
+   81 /4 id;AND rmd,id
+RQ 81 /4 id;AND rmq,id
+RW 81 /5 iw;SUB rmw,iw
+   81 /5 id;SUB rmd,id
+RQ 81 /5 id;SUB rmq,id
+RW 81 /6 iw;XOR rmw,iw
+   81 /6 id;XOR rmd,id
+RQ 81 /6 id;XOR rmq,id
+RW 81 /7 iw;CMP rmw,iw
+   81 /7 id;CMP rmd,id
+RQ 81 /7 id;CMP rmq,id
+   82 /0 ib;ADD rmb,ib
+   82 /1 ib;OR  rmb,ib
+   82 /2 ib;ADC rmb,ib
+   82 /3 ib;SBB rmb,ib
+   82 /4 ib;AND rmb,ib
+   82 /5 ib;SUB rmb,ib
+   82 /6 ib;XOR rmb,ib
+   82 /7 ib;CMP rmb,ib
+RW 83 /0 ib;ADD rmw,ib
+   83 /0 ib;ADD rmd,ib
+RQ 83 /0 ib;ADD rmq,ib
+RW 83 /1 ib;OR  rmw,ib
+   83 /1 ib;OR  rmd,ib
+RQ 83 /1 ib;OR  rmq,ib
+RW 83 /2 ib;ADC rmw,ib
+   83 /2 ib;ADC rmd,ib
+RQ 83 /2 ib;ADC rmq,ib
+RW 83 /3 ib;SBB rmw,ib
+   83 /3 ib;SBB rmd,ib
+RQ 83 /3 ib;SBB rmq,ib
+RW 83 /4 ib;AND rmw,ib
+   83 /4 ib;AND rmd,ib
+RQ 83 /4 ib;AND rmq,ib
+RW 83 /5 ib;SUB rmw,ib
+   83 /5 ib;SUB rmd,ib
+RQ 83 /5 ib;SUB rmq,ib
+RW 83 /6 ib;XOR rmw,ib
+   83 /6 ib;XOR rmd,ib
+RQ 83 /6 ib;XOR rmq,ib
+RW 83 /7 ib;CMP rmw,ib
+   83 /7 ib;CMP rmd,ib
+RQ 83 /7 ib;CMP rmq,ib
+#      == END OF immediate ==
+
+   84 /r   ;TEST rmb, rb
+RW 85 /r   ;TEST rmw, rw
+   85 /r   ;TEST rmd, rd
+RQ 85 /r   ;TEST rmq, rq
+
+   86 /r   ;XCHG rb, rmb
+RW 87 /r   ;XCHG rw, rmw
+   87 /r   ;XCHG rd, rmd
+RQ 87 /r   ;XCHG rq, rmq
+
+   86 /r   ;XCHG rmb, rb
+RW 87 /r   ;XCHG rmw, rw
+   87 /r   ;XCHG rmd, rd
+RQ 87 /r   ;XCHG rmq, rq
+
+   88 /r   ;MOV rmb, rb
+RW 89 /r   ;MOV rmw, rw
+   89 /r   ;MOV rmd, rd
+RQ 89 /r   ;MOV rmq, rq
+   8A /r   ;MOV rb, rmb
+RW 8B /r   ;MOV rw, rmw
+   8B /r   ;MOV rd, rmd
+RQ 8B /r   ;MOV rq, rmq
+
+#TODO Add 8C MOV m16 Sreg (wtf is Sreg? maybe flags?)
+
+RW 8D /r   ;LEA rw, mw
+   8D /r   ;LEA rd, md
+RQ 8D /r   ;LEA rq, mq
+
+#TODO ADD 8E MOV Sreg r/m16
+
+RW 8F /0   ;POP mw
+# \/ only 32bit
+   8F /0   ;POP md
+# \/ only 64bit
+RQ 8F /0   ;POP mq
+
+#      == START OF XCHG ==
+   90      ;NOP
+RW 90      ;XCHG AX, AX
+RW 90      ;XCHG AX
+RW 91      ;XCHG CX, AX
+RW 91      ;XCHG AX, CX
+RW 91      ;XCHG CX
+RW 92      ;XCHG DX, AX
+RW 92      ;XCHG AX, DX
+RW 92      ;XCHG DX
+RW 93      ;XCHG BX, AX
+RW 93      ;XCHG AX, BX
+RW 93      ;XCHG BX
+RW 94      ;XCHG SP, AX
+RW 94      ;XCHG AX, SX
+RW 94      ;XCHG SP
+RW 95      ;XCHG BP, AX
+RW 95      ;XCHG AX, BP
+RW 95      ;XCHG BP
+RW 96      ;XCHG SI, AX
+RW 96      ;XCHG AX, SI
+RW 96      ;XCHG SI
+RW 97      ;XCHG DI, AX
+RW 97      ;XCHG AX, DI
+RW 97      ;XCHG DI
+   90      ;XCHG EAX, EAX
+   90      ;XCHG EAX
+   91      ;XCHG ECX, EAX
+   91      ;XCHG EAX, ECX
+   91      ;XCHG ECX
+   92      ;XCHG EDX, EAX
+   92      ;XCHG EAX, EDX
+   92      ;XCHG EDX
+   93      ;XCHG EBX, EAX
+   93      ;XCHG EAX, EBX
+   93      ;XCHG EBX
+   94      ;XCHG ESP, EAX
+   94      ;XCHG EAX, ESP
+   94      ;XCHG ESP
+   95      ;XCHG EBP, EAX
+   95      ;XCHG EAX, EBP
+   95      ;XCHG EBP
+   96      ;XCHG ESI, EAX
+   96      ;XCHG EAX, ESI
+   96      ;XCHG ESI
+   97      ;XCHG EDI, EAX
+   97      ;XCHG EAX, EDI
+   97      ;XCHG EDI
+RQ 90      ;XCHG RAX, RAX
+RQ 90      ;XCHG RAX
+RQ 91      ;XCHG RCX, RAX
+RQ 91      ;XCHG RAX, RCX
+RQ 91      ;XCHG RCX
+RQ 92      ;XCHG RDX, RAX
+RQ 92      ;XCHG RAX, RDX
+RQ 92      ;XCHG RDX
+RQ 93      ;XCHG RBX, RAX
+RQ 93      ;XCHG RAX, RBX
+RQ 93      ;XCHG RBX
+RQ 94      ;XCHG RSP, RAX
+RQ 94      ;XCHG RAX, RSP
+RQ 94      ;XCHG RSP
+RQ 95      ;XCHG RBP, RAX
+RQ 95      ;XCHG RAX, RBP
+RQ 95      ;XCHG RBP
+RQ 96      ;XCHG RSI, RAX
+RQ 96      ;XCHG RAX, RSI
+RQ 96      ;XCHG RSI
+RQ 97      ;XCHG RDI, RAX
+RQ 97      ;XCHG RAX, RDI
+RQ 97      ;XCHG RDI
+#      == END OF XCHG ==
+
+#F3 90 => PAUSE
+
+RW 98      ;CBW
+RW 98      ;CBW AX, AL
+   98      ;CBDE
+   98      ;CBDE EAX, AX
+RQ 98      ;CBQE
+RQ 98      ;CBQE RAX, EAX
+RW 99      ;CWD DX, AX
+RW 99      ;CWD
+   99      ;CWQ EDX, EAX
+   99      ;CWQ
+RQ 99      ;CQO RDX, RAX
+RQ 99      ;CQO
+
+#TODO CALLF? [9A]
+#TODO FWAIT, WAIT [9B]
+#TODO [9C,9D,9E,9F,A0,A1,A2,A3]
+
+
+   A4      ;MOVSB
+   A4      ;MOVS  mb
+RW A5      ;MOVSW
+RW A5      ;MOVS  mw
+   A5      ;MOVSD
+   A5      ;MOVS  md
+RQ A5      ;MOVSQ
+RQ A5      ;MOVS  mq
+
+   A6      ;CMPSB
+   A6      ;CMPS  mb
+RW A7      ;CMPSW
+RW A7      ;CMPS  mw
+   A7      ;CMPSD
+   A7      ;CMPS  md
+RQ A7      ;CMPSQ
+RQ A7      ;CMPS  mq
+
+   A8 ib   ;TEST AL, ib
+RW A9 iw   ;TEST AX, iw
+   A9 id   ;TEST EAX, id
+RQ A9 id   ;TEST RAX, id
+
+   AA      ;STOSB
+   AA      ;STOS  mb
+RW AB      ;STOSW
+RW AB      ;STOS  mw
+   AB      ;STOSD
+   AB      ;STOS  md
+RQ AB      ;STOSQ
+RQ AB      ;STOS  mq
+
+   AC      ;LODSB
+   AC      ;LODS  mb
+RW AD      ;LODSW
+RW AD      ;LODS  mw
+   AD      ;LODSD
+   AD      ;LODS  md
+RQ AD      ;LODSQ
+RQ AD      ;LODS  mq
+
+   AE      ;SCASB
+   AE      ;SCAS  mb
+RW AF      ;SCASW
+RW AF      ;SCAS  mw
+   AF      ;SCASD
+   AF      ;SCAS  md
+RQ AF      ;SCASQ
+RQ AF      ;SCAS  mq
+
+
+#      == MOV immediate ==
+   B0 ib   ;MOV AL, ib
+   B1 ib   ;MOV CL, ib
+   B2 ib   ;MOV DL, ib
+   B3 ib   ;MOV BL, ib
+   B4 ib   ;MOV AH, ib
+   B5 ib   ;MOV CH, ib
+   B6 ib   ;MOV DH, ib
+   B7 ib   ;MOV AH, ib
+RW B8 iw   ;MOV AX, iw
+RW B9 iw   ;MOV CX, iw
+RW BA iw   ;MOV DX, iw
+RW BB iw   ;MOV BX, iw
+RW BC iw   ;MOV SP, iw
+RW BD iw   ;MOV BP, iw
+RW BE iw   ;MOV SI, iw
+RW BF iw   ;MOV DI, iw
+   B8 id   ;MOV EAX, id
+   B9 id   ;MOV ECX, id
+   BA id   ;MOV EDX, id
+   BB id   ;MOV EBX, id
+   BC id   ;MOV ESP, id
+   BD id   ;MOV EBP, id
+   BE id   ;MOV ESI, id
+   BF id   ;MOV EDI, id
+RQ B8 iq   ;MOV RAX, iq
+RQ B9 iq   ;MOV RCX, iq
+RQ BA iq   ;MOV RDX, iq
+RQ BB iq   ;MOV RBX, iq
+RQ BC iq   ;MOV RSP, iq
+RQ BD iq   ;MOV RBP, iq
+RQ BE iq   ;MOV RSI, iq
+RQ BF iq   ;MOV RDI, iq
+#    == END OF MOV immediate ==
+
+   C0 /0 ib;ROL rmb, ib
+   C0 /1 ib;ROR rmb, ib
+   C0 /2 ib;RCL rmb, ib
+   C0 /3 ib;RCR rmb, ib
+   C0 /4 ib;SHL rmb, ib
+   C0 /4 ib;SAL rmb, ib
+   C0 /5 ib;SHR rmb, ib
+   C0 /6 ib;SAL rmb, ib
+   C0 /6 ib;SHL rmb, ib
+   C0 /7 ib;SAR rmb, ib
+ 
+RW C1 /0 ib;ROL rmw, ib
+RW C1 /1 ib;ROR rmw, ib
+RW C1 /2 ib;RCL rmw, ib
+RW C1 /3 ib;RCR rmw, ib
+RW C1 /4 ib;SHL rmw, ib
+RW C1 /4 ib;SAL rmw, ib
+RW C1 /5 ib;SHR rmw, ib
+RW C1 /6 ib;SAL rmw, ib
+RW C1 /6 ib;SHL rmw, ib
+RW C1 /7 ib;SAR rmw, ib
+   
+   C1 /0 ib;ROL rmd, ib
+   C1 /1 ib;ROR rmd, ib
+   C1 /2 ib;RCL rmd, ib
+   C1 /3 ib;RCR rmd, ib
+   C1 /4 ib;SHL rmd, ib
+   C1 /4 ib;SAL rmd, ib
+   C1 /5 ib;SHR rmd, ib
+   C1 /6 ib;SAL rmd, ib
+   C1 /6 ib;SHL rmd, ib
+   C1 /7 ib;SAR rmd, ib
+
+RQ C1 /0 ib;ROL rmq, ib
+RQ C1 /1 ib;ROR rmq, ib
+RQ C1 /2 ib;RCL rmq, ib
+RQ C1 /3 ib;RCR rmq, ib
+RQ C1 /4 ib;SHL rmq, ib
+RQ C1 /4 ib;SAL rmq, ib
+RQ C1 /5 ib;SHR rmq, ib
+RQ C1 /6 ib;SAL rmq, ib
+RQ C1 /6 ib;SHL rmq, ib
+RQ C1 /7 ib;SAR rmq, ib
+
+   C2 iw   ;RET  iw
+   C2 iw   ;RETN iw
+   C3      ;RET
+   C3      ;RETN
+   
+RW C4 /r   ;LES rw, mw
+   C4 /r   ;LES rd, md
+RW C5 /r   ;LDS rw, mw
+   C5 /r   ;LDS rd, md
+   
+   C6 /0 ib;MOV rmb, ib
+RW C7 /0 iw;MOV rmw, iw
+   C7 /0 id;MOV rmd, id
+RQ C7 /0 id;MOV rmq, id
+
+   C8 iw ib;ENTER iw, ib
+   C9      ;LEAVE
+   
+   CA iw   ;RETF iw
+   CB      ;RETF
+   CC      ;INT 3
+   CD ib   ;INT ib
+   CE      ;INTO
+RW CF      ;IRET
+   CF      ;IRETD
+RQ CF      ;IRETQ
+
+   D0 /0   ;ROL rmb, 1
+   D0 /1   ;ROR rmb, 1
+   D0 /2   ;RCL rmb, 1
+   D0 /3   ;RCR rmb, 1
+   D0 /4   ;SHL rmb, 1
+   D0 /4   ;SAL rmb, 1
+   D0 /5   ;SHR rmb, 1
+   D0 /6   ;SAL rmb, 1
+   D0 /6   ;SHL rmb, 1
+   D0 /7   ;SAR rmb, 1
+ 
+RW D1 /0   ;ROL rmw, 1
+RW D1 /1   ;ROR rmw, 1
+RW D1 /2   ;RCL rmw, 1
+RW D1 /3   ;RCR rmw, 1
+RW D1 /4   ;SHL rmw, 1
+RW D1 /4   ;SAL rmw, 1
+RW D1 /5   ;SHR rmw, 1
+RW D1 /6   ;SAL rmw, 1
+RW D1 /6   ;SHL rmw, 1
+RW D1 /7   ;SAR rmw, 1
+   
+   D1 /0   ;ROL rmd, 1
+   D1 /1   ;ROR rmd, 1
+   D1 /2   ;RCL rmd, 1
+   D1 /3   ;RCR rmd, 1
+   D1 /4   ;SHL rmd, 1
+   D1 /4   ;SAL rmd, 1
+   D1 /5   ;SHR rmd, 1
+   D1 /6   ;SAL rmd, 1
+   D1 /6   ;SHL rmd, 1
+   D1 /7   ;SAR rmd, 1
+
+RQ D1 /0   ;ROL rmq, 1
+RQ D1 /1   ;ROR rmq, 1
+RQ D1 /2   ;RCL rmq, 1
+RQ D1 /3   ;RCR rmq, 1
+RQ D1 /4   ;SHL rmq, 1
+RQ D1 /4   ;SAL rmq, 1
+RQ D1 /5   ;SHR rmq, 1
+RQ D1 /6   ;SAL rmq, 1
+RQ D1 /6   ;SHL rmq, 1
+RQ D1 /7   ;SAR rmq, 1
+
+   D2 /0   ;ROL rmb, CL
+   D2 /1   ;ROR rmb, CL
+   D2 /2   ;RCL rmb, CL
+   D2 /3   ;RCR rmb, CL
+   D2 /4   ;SHL rmb, CL
+   D2 /4   ;SAL rmb, CL
+   D2 /5   ;SHR rmb, CL
+   D2 /6   ;SAL rmb, CL
+   D2 /6   ;SHL rmb, CL
+   D2 /7   ;SAR rmb, CL
+ 
+RW D3 /0   ;ROL rmw, CL
+RW D3 /1   ;ROR rmw, CL
+RW D3 /2   ;RCL rmw, CL
+RW D3 /3   ;RCR rmw, CL
+RW D3 /4   ;SHL rmw, CL
+RW D3 /4   ;SAL rmw, CL
+RW D3 /5   ;SHR rmw, CL
+RW D3 /6   ;SAL rmw, CL
+RW D3 /6   ;SHL rmw, CL
+RW D3 /7   ;SAR rmw, CL
+   
+   D3 /0   ;ROL rmd, CL
+   D3 /1   ;ROR rmd, CL
+   D3 /2   ;RCL rmd, CL
+   D3 /3   ;RCR rmd, CL
+   D3 /4   ;SHL rmd, CL
+   D3 /4   ;SAL rmd, CL
+   D3 /5   ;SHR rmd, CL
+   D3 /6   ;SAL rmd, CL
+   D3 /6   ;SHL rmd, CL
+   D3 /7   ;SAR rmd, CL
+
+RQ D3 /0   ;ROL rmq, CL
+RQ D3 /1   ;ROR rmq, CL
+RQ D3 /2   ;RCL rmq, CL
+RQ D3 /3   ;RCR rmq, CL
+RQ D3 /4   ;SHL rmq, CL
+RQ D3 /4   ;SAL rmq, CL
+RQ D3 /5   ;SHR rmq, CL
+RQ D3 /6   ;SAL rmq, CL
+RQ D3 /6   ;SHL rmq, CL
+RQ D3 /7   ;SAR rmq, CL
+
+   D4 0A   ;AAM
+   D4 ib   ;AMX ib
+   D5 0A   ;AAD
+   D5 ib   ;ADX ib
+   D6      ;SALC
+   D6      ;SETALC
+   D7      ;XLAT
+   D7      ;XLATB
+   
+#TODO [D8,D9,DA,DB,DC,DD,DE,DF] floating point instructions
+
+   E0 ib   ;LOOPNZ ib
+   E0 ib   ;LOOPNE ib
+   E1 ib   ;LOOPZ  ib
+   E1 ib   ;LOOPE  ib
+   E2 ib   ;LOOP   ib
+   E2 ib   ;LOOP   ib
+   E3 ib   ;JCXZ   ib
+   E3 ib   ;JECXZ  ib
+   E3 ib   ;JRCXZ  ib
+
+   E4 ib   ;IN AL, ib
+   E4 ib   ;IN ib
+RW E5 ib   ;IN AX, ib
+   E5 ib   ;IN EAX, ib
+RQ E5 ib   ;IN RAX, ib
+   E6 ib   ;OUT AL, ib
+   E6 ib   ;OUT ib
+RW E7 ib   ;OUT ib, AX
+   E7 ib   ;OUT ib, EAX
+RQ E7 ib   ;OUT ib, RAX
+
+#TODO Reminder: the word call isn't relative like the others [which is why it's disabled]
+#RW E8 iw   ;CALL iw
+   E8 id   ;CALL id
+RW E9 iw   ;JMP iw
+   E9 id   ;JMP id
+#TODO ADD JMPF [EA]
+   EB ib   ;JMP ib
+
+   EC      ;IN AL, DX
+   EC      ;IN DX
+RW ED      ;IN AX, DX
+   ED      ;IN EAX, DX
+RQ ED      ;IN RAX, DX
+   EE      ;OUT AL, DX
+   EE      ;OUT DX
+RW EF      ;OUT DX, AX
+   EF      ;OUT DX, EAX
+RQ EF      ;OUT DX, RAX
+
+#TODO ADD PREFIX SUPPORT (LIKE [F0] LOCK)
+
+   F1      ;INT1
+   F1      ;ICEBP
+   
+#ALSO PREFIXES [F2, F3] (REP)
+
+   F4      ;HLT
+   F5      ;CMC
+
+   F6 /0 ib;TEST rmb, ib
+   F6 /1 ib;TEST rmb, ib
+   F6 /2 ib;NOT  rmb, ib
+   F6 /3 ib;NEG  rmb, ib
+   F6 /4   ;MUL  rmb
+   F6 /5   ;IMUL rmb
+   F6 /6   ;DIV  rmb
+   F6 /7   ;IDIV rmb
+   
+RW F7 /0 iw;TEST rmw, iw
+RW F7 /1 iw;TEST rmw, iw
+RW F7 /2 iw;NOT  rmw, iw
+RW F7 /3 iw;NEG  rmw, iw
+RW F7 /4   ;MUL  rmw
+RW F7 /5   ;IMUL rmw
+RW F7 /6   ;DIV  rmw
+RW F7 /7   ;IDIV rmw
+   
+   F7 /0 id;TEST rmd, id
+   F7 /1 id;TEST rmd, id
+   F7 /2 id;NOT  rmd, id
+   F7 /3 id;NEG  rmd, id
+   F7 /4   ;MUL  rmd
+   F7 /5   ;IMUL rmd
+   F7 /6   ;DIV  rmd
+   F7 /7   ;IDIV rmd
+   
+RQ F7 /0 iq;TEST rmq, iq
+RQ F7 /1 iq;TEST rmq, iq
+RQ F7 /2 iq;NOT  rmq, iq
+RQ F7 /3 iq;NEG  rmq, iq
+RQ F7 /4   ;MUL  rmq
+RQ F7 /5   ;IMUL rmq
+RQ F7 /6   ;DIV  rmq
+RQ F7 /7   ;IDIV rmq
+
+   F8      ;CLC
+   F9      ;STC
+   FA      ;CLI
+   FB      ;STI
+   FC      ;CLD
+   FD      ;STD
+   
+   FE /0   ;INC rmb
+   FE /1   ;DEC rmb
+   
+RW FF /0   ;INC rmw
+   FF /0   ;INC rmd
+RQ FF /0   ;INC rmq
+RW FF /1   ;DEC rmw
+   FF /1   ;DEC rmd
+RQ FF /1   ;DEC rmq
+RW FF /2   ;CALL rmw
+   FF /2   ;CALL rmd
+RQ FF /2   ;CALL rmq
+#[TODO ADD FF /3 CALLF]
+RW FF /4   ;JMP rmw
+   FF /4   ;JMP rmd
+RQ FF /4   ;JMP rmq
+#[TODO ADD FF /5 JMPF]
+#TODO Note: push rmw&rmd for 32bit and push rmw&rmq for 64bit
+RW FF /6   ;PUSH rmw
+   FF /6   ;PUSH rmd
+RQ FF /6   ;PUSH rmq
+
+#DIRECT BYTES
+   ib      ;DB ib
+   iw      ;DW iw
+   id      ;DD id
+   iq      ;DQ iq
