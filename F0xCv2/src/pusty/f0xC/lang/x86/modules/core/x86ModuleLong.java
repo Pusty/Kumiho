@@ -207,12 +207,13 @@ public class x86ModuleLong extends F0xModule {
 		int index = Integer.parseInt(event.getNode().refferedBy());
 		ContextFunction f = event.getFunctionContext();
 		Parser parser = event.getF0xC().getParser();
-		if(index >= f.getParameters().size()) {
-			event.getCurrentList().add("mov reg0, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1)+"]");
-			event.getCurrentList().add("mov reg3, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1+1)+"]");
+		int parameterSize = f.getParameterSize(parser.getAddressSize());
+		if(index >= parameterSize) {
+			event.getCurrentList().add("mov reg0, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1)+"]");
+			event.getCurrentList().add("mov reg3, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1+1)+"]");
 		}else {
-			event.getCurrentList().add("mov reg0, addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1)+"]");
-			event.getCurrentList().add("mov reg3, addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1-1)+"]");
+			event.getCurrentList().add("mov reg0, addrname [regB+addrsize*"+(parameterSize-index+1)+"]");
+			event.getCurrentList().add("mov reg3, addrname [regB+addrsize*"+(parameterSize-index+1-1)+"]");
 		}
 	}
 	
@@ -223,12 +224,13 @@ public class x86ModuleLong extends F0xModule {
 		int index = Integer.parseInt(event.getNode().refferedBy());
 		ContextFunction f = event.getFunctionContext();
 		Parser parser = event.getF0xC().getParser();
-		if(index >= f.getParameters().size()) {
-			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1)+"], reg0");
-			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1+1)+"], reg3");
+		int parameterSize = f.getParameterSize(parser.getAddressSize());
+		if(index >= parameterSize) {
+			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1)+"], reg0");
+			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1+1)+"], reg3");
 		}else {
-			event.getCurrentList().add("mov addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1)+"], reg0");
-			event.getCurrentList().add("mov addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1-1)+"], reg3");
+			event.getCurrentList().add("mov addrname [regB+addrsize*"+(parameterSize-index+1)+"], reg0");
+			event.getCurrentList().add("mov addrname [regB+addrsize*"+(parameterSize-index+1-1)+"], reg3");
 		}
 	}
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixGlobalLoadLONG, priority=F0xEventPriority.NORMAL)

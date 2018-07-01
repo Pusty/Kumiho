@@ -1,6 +1,6 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstConvert extends Instruction {
@@ -9,8 +9,8 @@ public class InstConvert extends Instruction {
 	/*
 	 * Converts Stack Values from TypA into TypB
 	 */
-	public InstConvert(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstConvert(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Convert with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		setTypes();
 	}

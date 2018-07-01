@@ -2,7 +2,7 @@ package pusty.f0cr.inst.types;
 
 import java.lang.reflect.Array;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstLocalVar extends Instruction {
@@ -14,8 +14,8 @@ public class InstLocalVar extends Instruction {
 	/*
 	 *  Loads Value from Stack or Loads Value into Stack (from or into a local variable)
 	 */
-	public InstLocalVar(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstLocalVar(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created LocalVar instruction with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		cla = setType();
 		if(cla == Array.class)

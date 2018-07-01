@@ -10,10 +10,10 @@ public class Internal {
 	//This are diagnostic variables to check if automatic garbage collection is working as expected
 	//Considering these only takes 4*4 bytes and the problems/bloat code of implementing them separate is bigger
 	//these can stay/be used in any case for the default target
-	private static int allocCalls;
-	private static int allocMemory;
-	private static int freeCalls;
-	private static int freedMemory;
+	public static int allocCalls;
+	public static int allocMemory;
+	public static int freeCalls;
+	public static int freedMemory;
 	
 	private static int lastMarkedAddress; //marking addresses for debug and exception reasons
 	private static GarbageCollector gbCollector;

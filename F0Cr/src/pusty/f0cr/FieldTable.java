@@ -1,8 +1,9 @@
 package pusty.f0cr;
 
 import java.io.DataInputStream;
-
 import pusty.f0cr.data.FieldInfo;
+import pusty.f0cr.util.AccessFlags;
+import pusty.f0cr.util.Descriptor;
 
 public class FieldTable {
 	protected int tableSize;
@@ -29,4 +30,11 @@ public class FieldTable {
 		}
 		return null;
 	}
+	
+	public void printOut(String pre) {
+		for(FieldInfo field:indexes) {
+			System.out.println(pre+"Variable: ["+AccessFlags.getFlags(field.getAccessFlags())+"] "+Descriptor.getType(field.getDescription())+" "+field.getName()+ "("+field.getDescription()+")");
+		}
+	}
+	
 }

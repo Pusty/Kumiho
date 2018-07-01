@@ -954,6 +954,7 @@ public class InjectingEngine {
 		 * Add an ordinal import
 		 * @param ord function to import by this DLL
 		 */
+		@SuppressWarnings("deprecation")
 		public void addOrdinal(int ord) {
 			imports.add(new Integer(ord));
 		}

@@ -1,6 +1,6 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstConst extends Instruction {
@@ -8,8 +8,8 @@ public class InstConst extends Instruction {
 	/*
 	 * Pushes the getValue() onto the stack
 	 */
-	public InstConst(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstConst(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Constant with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		value = setValue();
 	}
@@ -62,10 +62,15 @@ public class InstConst extends Instruction {
 		else if(inst == Opcodes.FCONST_2) return 2f;
 		else if(inst == Opcodes.LCONST_0) return 0l;
 		else if(inst == Opcodes.LCONST_1) return 1l;
-		else if(inst == Opcodes.BIPUSH) return data[0]&0xFF;
-		else if(inst == Opcodes.SIPUSH) return (((data[0]&0xFF) << 8) + data[1]&0xFF);
-		else if(inst == Opcodes.LDC) return pool.get(data[0]&0xFF);
-		else if(inst == Opcodes.LDC2_W || inst == Opcodes.LDC_W) return pool.get(((data[0]&0xFF) << 8)+data[1]&0xFF);
+		else if(inst == Opcodes.BIPUSH) return ((int)((byte)(data[0])));
+		else if(inst == Opcodes.SIPUSH) return ((short)((((int)data[0])&0xFF) << 8) | (((int)data[1])&0xFF));
+		else if(inst == Opcodes.LDC) return pool.get(((int)data[0])&0xFF);
+		else if(inst == Opcodes.LDC2_W || inst == Opcodes.LDC_W) return pool.get((int)((((int)data[0])&0xFF) << 8)|(((int)data[1])&0xFF));
 		return null;
+	}
+	
+	public String toString() {
+		if(value == null) return "null";
+		return (value).toString();
 	}
 }

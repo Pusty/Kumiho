@@ -141,7 +141,6 @@ public class OLong extends ONumber {
         int r;
         int charPos = index;
         char sign = 0;
-
         if (i < 0) {
             sign = '-';
             i = -i;
@@ -155,7 +154,6 @@ public class OLong extends ONumber {
             buf[--charPos] = OInteger.DigitOnes[r];
             buf[--charPos] = OInteger.DigitTens[r];
         }
-
         // Get 2 digits/iteration using ints
         int q2;
         int i2 = (int)i;
@@ -167,7 +165,6 @@ public class OLong extends ONumber {
             buf[--charPos] = OInteger.DigitOnes[r];
             buf[--charPos] = OInteger.DigitTens[r];
         }
-
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
         for (;;) {

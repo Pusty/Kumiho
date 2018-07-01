@@ -204,7 +204,12 @@ public class ExecutableReader  {
 	
 	public static int identify(File file) throws Exception {
 		FileInputStream fis = new FileInputStream(file);
-		ExecutableStream str = new ExecutableStream(fis);
+		int result = identify(new ExecutableStream(fis));
+		fis.close();
+		return result;
+	}
+	
+	public static int identify(ExecutableStream str) throws Exception {
 		ExecutableReader dummy = new ExecutableReader();
 		dummy.exStr = str;
 		char fstChar = (char)str.getByte(str.readAddrByte());
@@ -224,24 +229,30 @@ public class ExecutableReader  {
 			else if(machine == IMAGE_FILE_HEADER.IMAGE_FILE_MACHINE_AMD64)
 				result = TYPEID_PE_x64;
 		}
-		fis.close();
+		str.setIndex(0);
 		return result;
 	}
+	
 	public static ExecutableReader create(File file) throws Exception {
-		int identify = identify(file);
 		FileInputStream fis = new FileInputStream(file);
+		ExecutableReader reader = create(new ExecutableStream(fis));
+		fis.close();
+		return reader;
+	}
+	
+	public static ExecutableReader create(ExecutableStream file) throws Exception {
+		int identify = identify(file);
 		ExecutableReader reader = null;
 		switch(identify) {
 			case TYPEID_PE_x86:
-				reader = new ExecutableReader(fis);
+				reader = new ExecutableReader(file);
 			break;
 			case TYPEID_PE_x64:
-				reader = new ExecutableReader64(fis);
+				reader = new ExecutableReader64(file);
 			break;
 			default:
 				System.out.println("[!] Arch not supported (Error: "+identify+")");
 		}
-		fis.close();
 		return reader;
 	}
 

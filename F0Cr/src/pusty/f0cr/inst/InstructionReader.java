@@ -3,15 +3,18 @@ package pusty.f0cr.inst;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 import pusty.f0cr.ClassReader;
 import pusty.f0cr.inst.types.Instruction;
 import pusty.f0cr.inst.types.InstructionHandler;
+import pusty.f0cr.util.CountingInputStream;
 
 public class InstructionReader {
 	protected byte[] data;
-	protected Instruction[] instructions;
+	protected HashMap<Integer, Instruction> instructionHash;
 	protected ClassReader classReader;
 	public InstructionReader(ClassReader classReader, byte[] data) throws Exception {
 		this.classReader = classReader;
@@ -22,111 +25,128 @@ public class InstructionReader {
 		try { bis.close(); }
 		catch (IOException e) { e.printStackTrace(); }
 	}
-	public void read(DataInputStream d) throws Exception {
-		ArrayList<Instruction> instructionList = new ArrayList<Instruction>();
+	public void read(DataInputStream dis) throws Exception {
+		instructionHash = new HashMap<Integer, Instruction>();
+		CountingInputStream d = new CountingInputStream(dis);
 		byte b;
+		int indexOfInst;
 		while(d.available()>0) {
+			indexOfInst = d.getIndex();
 			b = d.readByte();
 			int v = b&0xFF;
 			if(v == Opcodes.LOOKUPSWITCH) {
-				//Same as Tableswitch. Needs rework
-				//Padding stuff and things.
-				//Is kinda buggy, will break if npar1 goes into its 4th byte so this needs reworking
+				if((indexOfInst+1)%4 != 0)
+					for(int t=0;t<4-((indexOfInst+1)%4);t++) //PADDING
+						d.readByte();			
 				byte[] data = new byte[8];
 				for(int i=0;i<data.length;i++)
 					data[i] = d.readByte();
-				boolean c = false;
-				int index = 0;
-				for(int i=0;i<data.length;i++) {
-					if(data[i]!=0 && c==false)c=true;
-					if(data[i]==0 && c==true){c=false;index=i-1;break;}
-				}
-				byte[] data2 = new byte[4];
-				for(int i=0;i<data2.length;i++) {
-					if(index+1+i >= data.length)
-						data2[i] = d.readByte();
-					else
-						data2[i] = data[index+1+i];
-				}			
-				int amount = (data2[0] << 24) | (data2[1] << 16) | (data2[2] << 8) | data2[3];
+				int amount = ((data[4]&0xFF) << 24) + ((data[5]&0xFF) << 16) + ((data[6]&0xFF) << 8) + (data[7]&0xFF);
 				byte[] realData = new byte[8+amount*8];
 				for(int i=0;i<4;i++) //Default Branch
-					realData[0+i] = data[index-3+i];
+					realData[0+i] = data[i];
 				for(int i=0;i<4;i++) //Amount
-					realData[4+i] = data2[i];		
+					realData[4+i] = data[4+i];		
 				for(int i=0;i<amount*8;i++)
 					realData[8+i]=d.readByte();
-				instructionList.add(new Instruction(b, realData));				
+				instructionHash.put(indexOfInst, new Instruction(this, b, realData));
 			}else if(v == Opcodes.TABLESWITCH) {
-				//Padding stuff and things.
-				//Is kinda buggy, will break if npar1 goes into its 4th byte so this needs reworking
-				byte[] data = new byte[8];
+				//Padding
+				if((indexOfInst+1)%4 != 0)
+					for(int t=0;t<4-((indexOfInst+1)%4);t++) //PADDING
+						d.readByte();
+				byte[] data = new byte[12];
 				for(int i=0;i<data.length;i++)
 					data[i] = d.readByte();
-				boolean c = false;
-				int index = 0;
-				for(int i=0;i<data.length;i++) {
-					if(data[i]!=0 && c==false)c=true;
-					if(data[i]==0 && c==true){c=false;index=i-1;break;}
-				}
-				byte[] data2 = new byte[4];
-				for(int i=0;i<data2.length;i++) {
-					if(index+1+i >= data.length)
-						data2[i] = d.readByte();
-					else
-						data2[i] = data[index+1+i];
-				}			
-				int start = (data2[0] << 24) | (data2[1] << 16) | (data2[2] << 8) | data2[3];
-				byte[] data3 = new byte[4];
-				for(int i=0;i<4;i++)
-					data3[i] = d.readByte();
-				int end = (data3[0] << 24) | (data3[1] << 16) | (data3[2] << 8) | data3[3];
+			
+				int start = (((data[4]&0xFF) << 24) | ((data[5]&0xFF) << 16) | ((data[6]&0xFF) << 8) | (data[7]&0xFF));
+				int end = (((data[8]&0xFF) << 24) | ((data[9]&0xFF) << 16) | ((data[10]&0xFF) << 8) | (data[11]&0xFF));
 				byte[] realData = new byte[12+(end-start+1)*4];
 				for(int i=0;i<4;i++) //Default Branch
-					realData[0+i] = data[index-3+i];
-				for(int i=0;i<4;i++) //Start
-					realData[4+i] = data2[i];
-				for(int i=0;i<4;i++) //Start
-					realData[8+i] = data3[i];			
+					realData[0+i] = data[i];
+				for(int i=0;i<4;i++) //Minimum
+					realData[4+i] = data[4+i];
+				for(int i=0;i<4;i++) //Maximum
+					realData[8+i] = data[8+i];			
 				for(int i=0;i<(end-start+1)*4;i++)
 					realData[12+i]=d.readByte();
-				instructionList.add(new Instruction(b, realData));
+				instructionHash.put(indexOfInst, new Instruction(this, b, realData));
 			}else if(v == Opcodes.WIDE) {
 				
 				byte inst = d.readByte();
 				if(inst  == Opcodes.IINC) {
 					byte[] data = new byte[5];
-					instructionList.add(new Instruction(b, data));
+					instructionHash.put(indexOfInst, new Instruction(this, b, data));
 				}else {
 					byte[] data = new byte[3];
-					instructionList.add(new Instruction(b, data));
+					instructionHash.put(indexOfInst, new Instruction(this, b, data));
 				}
 			}else {
 				int dataSize = Opcodes.getSize(b);
 				byte[] data = new byte[dataSize];
 				for(int i=0;i<dataSize;i++)
 					data[i] = d.readByte();
-				instructionList.add(InstructionHandler.createInstruction(classReader.getPool(), b, data));
+				instructionHash.put(indexOfInst, InstructionHandler.createInstruction(this, b, data));
 			}
 		}
-		instructions = instructionList.toArray(new Instruction[instructionList.size()]);
 	}
+	
+	public ClassReader getReader() { return classReader; }
 	public byte[] getData() { return data; }
-	public Instruction[] getInstructions() { return instructions; }
+	/**
+	 * Outputs an array of instructions
+	 * @return returns array of instructions for legacy reasons
+	 */
+	@Deprecated
+	public Instruction[] getInstructions() { 
+		return instructionHash.values().toArray(new Instruction[instructionHash.size()]);
+	}
+	public HashMap<Integer, Instruction> getInstructionMap() {
+		return instructionHash;
+	}
 	public String toString() {
 		String output = "";
-		for(int i=0;i<instructions.length;i++) {
-			String line = Opcodes.getName(instructions[i].getInstruction())+" ";
-			line = line + Opcodes.formatData(classReader.getPool(), instructions[i].getInstruction(), instructions[i].getData());
+		Integer[] array = instructionHash.keySet().toArray(new Integer[instructionHash.size()]);
+		Arrays.sort(array);
+		for(Integer index:array) {
+			String line = Opcodes.getName(instructionHash.get(index).getInstruction())+" ";
+			line = line + Opcodes.formatData(classReader.getPool(), instructionHash.get(index).getInstruction(),instructionHash.get(index).getData());
 			output = output + line + "\n";
 		}
 		return output;
 	}
 	
 	public void printOut(String pre) {
-		for(int li=0;li<getInstructions().length;li++) {
-			Instruction l = getInstructions()[li];
-			System.out.println(pre+l.getClass()+": "+l.getName()+" >> "+l.toString());
+		Integer[] array = instructionHash.keySet().toArray(new Integer[instructionHash.size()]);
+		Arrays.sort(array);
+		for(Integer index:array) {
+			Instruction l = instructionHash.get(index);
+			System.out.println(pre+"["+index+"]"+l.getClass().getSimpleName()+": "+l.getName()+" >> "+l.toString());
 		}
+	}
+	
+	public int getPosition(Instruction inst, int off) {
+		if(!instructionHash.containsValue(inst)) return 0;
+		int pos = 0;
+		for(Entry<Integer, Instruction> entry:instructionHash.entrySet()) {
+			if(entry.getValue()==inst) {
+				pos = entry.getKey();
+				break;
+			}
+		}
+		if(!instructionHash.containsKey(pos+off)) {
+			try {
+				throw new Exception("Couldn't resolve offset position "+pos+"(+"+off+")");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		//	System.err.println("Couldn't resolve offset position "+pos+"(+"+off+")"); return 0;
+		}
+		return pos+off;
+	}
+	public Instruction getInstruction(int pos) {
+		if(!instructionHash.containsKey(pos)) return null;
+		return instructionHash.get(pos);
 	}
 }

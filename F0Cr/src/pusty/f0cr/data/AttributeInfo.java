@@ -15,11 +15,12 @@ public class AttributeInfo {
 		this.classReader = classReader;
 		read(s);
 	}
+	String attributeType;
 	public void read(DataInputStream s) throws Exception {
 		attribute_name_index = s.readShort();
 		attribute_length = s.readInt();
 		
-		String attributeType = classReader.getPool().get(attribute_name_index).toString();
+		attributeType = classReader.getPool().get(attribute_name_index).toString();
 		if(attributeType.equals("Code"))
 			attribute = new CodeAttribute(classReader,s, attribute_length);
 		else if(attributeType.equals("SourceFile"))
@@ -66,6 +67,7 @@ public class AttributeInfo {
 			attribute = new Attribute(classReader,s, attribute_length);
 		}
 	}
+	public String getAttribute() { return attributeType; }
 	public short getAttributeNameIndex() { return attribute_name_index; }
 	public int getAttributeLength() { return attribute_length; }
 	public Attribute getInfo() { return attribute; }

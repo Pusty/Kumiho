@@ -1,14 +1,14 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstStack extends Instruction {
 	/*
 	 * Direct Stack Operations
 	 */
-	public InstStack(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstStack(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Stack with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 	}
 	public static boolean isInst(byte inst) {

@@ -1,6 +1,6 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstVar extends Instruction {
@@ -10,8 +10,8 @@ public class InstVar extends Instruction {
 	/*
 	 * Loads or Saves Variable either from Global or Object Space
 	 */
-	public InstVar(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstVar(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Var with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		if((inst&0xFF) == Opcodes.PUTFIELD) {
 			input = false;
@@ -26,7 +26,7 @@ public class InstVar extends Instruction {
 			input = true;
 			static_ = true;
 		}
-		poolIndex = (((data[0]&0xFF) << 8) + data[1]&0xFF);
+		poolIndex = (((data[0]&0xFF) << 8) + (data[1]&0xFF));
 	}
 	public boolean isLoad() {
 		return input;

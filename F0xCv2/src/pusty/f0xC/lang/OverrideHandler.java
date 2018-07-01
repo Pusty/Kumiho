@@ -30,11 +30,6 @@ public class OverrideHandler {
 		overrideClasses = cls;
 	}
 	
-	/*@OverrideTranslation(type = OverrideType.METHOD,override = "")
-	public void handle() {
-		
-	}*/
-	
 	public void process() {
 		classOverrides = new HashMap<String, String>();
 		methodOverrides = new HashMap<String, Method>();

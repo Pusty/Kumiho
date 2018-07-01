@@ -1,6 +1,6 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstMath extends Instruction {
@@ -9,8 +9,8 @@ public class InstMath extends Instruction {
 	/*
 	 * Reads v1 and v2 from stack then use math operation getOperation() on them and output value with type getType() to stack
 	 */
-	public InstMath(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstMath(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Math with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		operation = setOperation();
 		cla = setType();
@@ -21,13 +21,13 @@ public class InstMath extends Instruction {
 	//IINC STUFF
 	public int getLocalVariable() {
 		if(operation==MATH_INC)
-		return data[0]&0xFF; 
+		return (data[0]&0xFF); 
 		else return -1;
 	}
 	//IINC STUFF
 	public int getConstantValue() {
 		if(operation==MATH_INC)
-		return data[1]&0xFF; 
+		return (data[1]&0xFF); 
 		else return -1;
 	}
 	//number of arguments f.e. arg0*arg1 or -arg0

@@ -4,6 +4,9 @@ import java.io.DataInputStream;
 import java.io.InputStream;
 
 import pusty.f0cr.data.AttributeInfo;
+import pusty.f0cr.types.ClassReference;
+import pusty.f0cr.util.ObjectStruct;
+import pusty.f0cr.util.StaticStruct;
 
 /**
  * Reads a class as an object
@@ -30,7 +33,6 @@ public class ClassReader {
 		DataInputStream dis = new DataInputStream(is);
 		read(dis);
 	}
-	//TODO: add counter for current alignment to be able to check for switch statements
 	/**
 	 * Reads the input stream as content of this object
 	 * @param s the data stream to read from
@@ -132,7 +134,7 @@ public class ClassReader {
 	 * @return returns content off thisClassIndex element within the constant pool
 	 */
 	public String getClassName() {
-		return constantPool.get(thisClassIndex).toString();
+		return constantPool.get(((ClassReference)constantPool.get(thisClassIndex)).getIndex()).toString();
 	}
 	/**
 	 * Returns the constant pool of this class
@@ -140,5 +142,19 @@ public class ClassReader {
 	 */
 	public ConstantPool getPool() {
 		return constantPool;
+	}
+	/**
+	 * Creates a ObjectStruct which contains all data a object must save for it self
+	 * @return
+	 */
+	public ObjectStruct createObjectStruct() {
+		return new ObjectStruct(fieldTable);
+	}
+	/**
+	 * Creates a ObjectStruct which contains all data a object must save for it self
+	 * @return
+	 */
+	public StaticStruct createStaticStruct() {
+		return new StaticStruct(fieldTable);
 	}
 }

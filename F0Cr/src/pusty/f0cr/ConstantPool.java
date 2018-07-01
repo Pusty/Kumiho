@@ -16,6 +16,7 @@ public class ConstantPool {
 		read(s);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void read(DataInputStream s) throws Exception {
 		poolSize = s.readShort();
 		poolContent = new Object[poolSize];
@@ -101,12 +102,15 @@ public class ConstantPool {
 	}
 
 	public Object get(int index) {
-		return poolContent[index];
+		return poolContent[index&0xFFFF];
 	}
 	public Object[] getPool() {
 		return poolContent;
 	}
 	public int getSize() {
 		return poolSize;
+	}
+	public ClassReader getReader() {
+		return classReader;
 	}
 }

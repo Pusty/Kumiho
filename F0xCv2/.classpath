@@ -8,5 +8,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/F0Cr"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/F0xDc"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

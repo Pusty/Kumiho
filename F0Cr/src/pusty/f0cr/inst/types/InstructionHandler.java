@@ -1,28 +1,28 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 
 
 public class InstructionHandler {
-	public static Instruction createInstruction(ConstantPool pool, byte inst, byte[] data) {
+	public static Instruction createInstruction(InstructionReader reader, byte inst, byte[] data) {
 		if(InstAVar.isInst(inst))
-			return new InstAVar(pool, inst, data);
+			return new InstAVar(reader, inst, data);
 		if(InstBranch.isInst(inst))
-			return new InstBranch(pool, inst, data);
+			return new InstBranch(reader, inst, data);
 		if(InstCompare.isInst(inst))
-			return new InstCompare(pool, inst, data);
+			return new InstCompare(reader, inst, data);
 		if(InstConst.isInst(inst))
-			return new InstConst(pool, inst, data);
+			return new InstConst(reader, inst, data);
 		if(InstConvert.isInst(inst))
-			return new InstConvert(pool, inst, data);
+			return new InstConvert(reader, inst, data);
 		if(InstLocalVar.isInst(inst))
-			return new InstLocalVar(pool, inst, data);
+			return new InstLocalVar(reader, inst, data);
 		if(InstMath.isInst(inst))
-			return new InstMath(pool, inst, data);
+			return new InstMath(reader, inst, data);
 		if(InstStack.isInst(inst))
-			return new InstStack(pool, inst, data);
+			return new InstStack(reader, inst, data);
 		if(InstVar.isInst(inst))
-			return new InstVar(pool, inst, data);	
-		return new Instruction(pool, inst, data);
+			return new InstVar(reader, inst, data);	
+		return new Instruction(reader, inst, data);
 	}
 }

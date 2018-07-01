@@ -24,6 +24,14 @@ public class ExecutableStream {
 		return inputData;
 	}
 	
+	public int getSize() {
+		return inputData.length;
+	}
+	
+	public void reset() {
+		inputIndex = 0;
+	}
+	
 	public int readAddrShort() throws IOException {
 		int temp = inputIndex;
 		inputIndex=inputIndex+2;

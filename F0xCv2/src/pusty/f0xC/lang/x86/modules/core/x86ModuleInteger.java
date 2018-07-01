@@ -176,12 +176,14 @@ public class x86ModuleInteger extends F0xModule {
 	
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixObjectLoadBYTE, priority=F0xEventPriority.NORMAL)
 	public void nodeVARFIX_OBJECTLOADBYTE(F0xEventNodeVarFixParsing event) { 
-		event.getCurrentList().add("mov reg0, addrname [reg1+"+nodeVARFIX_OBJECTOFFSET(event)+"]");
+		event.getCurrentList().add("xor reg0, reg0");
+		event.getCurrentList().add("mov reg0b, [reg1+"+nodeVARFIX_OBJECTOFFSET(event)+"]");
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixObjectLoadSHORT, priority=F0xEventPriority.NORMAL)
-	public void nodeVARFIX_OBJECTLOADSHORT(F0xEventNodeVarFixParsing event) { 
-		event.getCurrentList().add("mov reg0, addrname [reg1+"+nodeVARFIX_OBJECTOFFSET(event)+"]");
+	public void nodeVARFIX_OBJECTLOADSHORT(F0xEventNodeVarFixParsing event) {
+		event.getCurrentList().add("xor reg0, reg0");
+		event.getCurrentList().add("mov reg0s,  [reg1+"+nodeVARFIX_OBJECTOFFSET(event)+"]");
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixObjectLoadINT, priority=F0xEventPriority.NORMAL)
@@ -225,13 +227,15 @@ public class x86ModuleInteger extends F0xModule {
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixArrayLoadBYTE, priority=F0xEventPriority.NORMAL)
 	public void nodeVARFIX_ARRAYLOADBYTE(F0xEventNodeVarFixParsing event) {
 		nodeVARFIX_ARRAYLOAD(event);
-		event.getCurrentList().add("mov reg0, [reg1]");
+		event.getCurrentList().add("xor reg0, reg0");
+		event.getCurrentList().add("mov reg0b, [reg1]");
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixArrayLoadSHORT, priority=F0xEventPriority.NORMAL)
 	public void nodeVARFIX_ARRAYLOADSHORT(F0xEventNodeVarFixParsing event) {
 		nodeVARFIX_ARRAYLOAD(event); 
-		event.getCurrentList().add("mov reg0, [reg1]");
+		event.getCurrentList().add("xor reg0, reg0");
+		event.getCurrentList().add("mov reg0s, [reg1]");
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.ParseNodeVarFixArrayLoadINT, priority=F0xEventPriority.NORMAL)
@@ -279,10 +283,11 @@ public class x86ModuleInteger extends F0xModule {
 		int index = Integer.parseInt(event.getNode().refferedBy());
 		ContextFunction f = event.getFunctionContext();
 		Parser parser = event.getF0xC().getParser();
-		if(index >= f.getParameters().size()) {
-			event.getCurrentList().add("mov reg0, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1)+"]");
+		int parameterSize = f.getParameterSize(parser.getAddressSize());
+		if(index >= parameterSize) {
+			event.getCurrentList().add("mov reg0, addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1)+"]");
 		}else {
-			event.getCurrentList().add("mov reg0, addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1)+"]");
+			event.getCurrentList().add("mov reg0, addrname [regB+addrsize*"+(parameterSize-index+1)+"]");
 		}
 	}
 	
@@ -290,10 +295,11 @@ public class x86ModuleInteger extends F0xModule {
 		int index = Integer.parseInt(event.getNode().refferedBy());
 		ContextFunction f = event.getFunctionContext();
 		Parser parser = event.getF0xC().getParser();
-		if(index >= f.getParameters().size())
-			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-f.getParameters().size(), parser.getAddressSize())+1)+"], reg0");
+		int parameterSize = f.getParameterSize(parser.getAddressSize());
+		if(index >= parameterSize)
+			event.getCurrentList().add("mov addrname [regB-addrsize*"+(f.getLocalVariableOffset(index-parameterSize, parser.getAddressSize())+1)+"], reg0");
 		else
-			event.getCurrentList().add("mov addrname [regB+addrsize*"+(f.getParameterSize(parser.getAddressSize())-f.getParameterOffset(index, parser.getAddressSize())+1)+"], reg0");
+			event.getCurrentList().add("mov addrname [regB+addrsize*"+(parameterSize-index+1)+"], reg0");
 	}
 	
 	

@@ -32,6 +32,7 @@ import pusty.f0xC.nodes.NodeStack;
 import pusty.f0xC.nodes.NodeVarFix;
 
 public abstract class Parser {
+	protected OverrideHandler overrideHandler;
 	public abstract String getLanguageName();
 	public void simplify(F0xC fox) {}
 	
@@ -125,7 +126,7 @@ public abstract class Parser {
 		return list;
 	}
 	public int getAddressSize() { return 0; } //Used for computing class and object size
-	public OverrideHandler getOverrideHandler() { return null; }
+	public OverrideHandler getOverrideHandler() { return overrideHandler; }
 	
 	private static int nodeStackIndex(NodeStack node) {
 		switch(node.getType()) {

@@ -23,6 +23,8 @@ public class FieldInfo {
 		descriptor_index = s.readShort();
 		attribute_table = new AttributeTable(classReader, s);
 	}
+	public String getName() { return classReader.getPool().get(name_index).toString(); }
+	public String getDescription() { return classReader.getPool().get(descriptor_index).toString(); }
 	public int getAttributeCount() { return attribute_table.getSize(); }
 	public int getDescriptorIndex() { return descriptor_index; }
 	public int getNameIndex() { return name_index; }

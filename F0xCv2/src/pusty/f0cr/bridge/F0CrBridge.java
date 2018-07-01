@@ -38,18 +38,25 @@ import pusty.f0xC.nodes.*;
 
 public class F0CrBridge {
 	
-	
 	/**
 	 * Function to parse through 'MainClass' in folder path (and sub classes)
 	 * path = path to binary files
 	 * className = class in format 'I/am/a/example/ClassFile'
 	 */
 	public static ArrayList<ContextClass> runThroughClass( F0xC fox, String path, String className) {
+		ArrayList<String> slist = new ArrayList<String>();
+		slist.add("pusty/f0xC/imports/Internal");
+		return runThroughClass(fox, path, className, null);
+	}
+
+	public static ArrayList<ContextClass> runThroughClass( F0xC fox, String path, String className, ArrayList<String> slist) {
 		HashMap<String, F0CrImportObject> importObjects = new HashMap<String, F0CrImportObject>();
 		
 	    HashMap<String, String> replaceMap = null;	
-		if(fox.getParser().getOverrideHandler() != null)
+		if(fox.getParser().getOverrideHandler() != null) {
+			fox.getParser().getOverrideHandler().process();
 			replaceMap = fox.getParser().getOverrideHandler().getClassOverrides();
+		}
 		
 		runThroughClass(importObjects,fox,path,className, null);
 		
@@ -59,7 +66,9 @@ public class F0CrBridge {
 		if(replaceMap != null && replaceMap.containsKey("java/lang/Class"))
 			runThroughClass(importObjects,fox,path, replaceMap.get("java/lang/Class"), "java/lang/Class");
 		
-		runThroughClass(importObjects,fox,path,"pusty/f0xC/imports/Internal", null);
+		if(slist != null)
+			for(String str:slist)
+				runThroughClass(importObjects,fox,path,str, null);
 		
 		ArrayList<ContextClass> result = new ArrayList<ContextClass>();
 		
@@ -374,6 +383,8 @@ public class F0CrBridge {
 			Integer[] array = new Integer[1];
 			array[0] = 0;
 			
+			int parameterSize = context.getParameterSize(fox.getParser().getAddressSize());
+			
 			if(!custom) {
 				//Normal execution
 				array = code.getInst().getInstructionMap().keySet().toArray(new Integer[code.getInst().getInstructionMap().size()]);
@@ -391,7 +402,7 @@ public class F0CrBridge {
 					
 					
 					//TODO: Apperently the same Variable index can be given twice. This is critical for a (Not Object) to (Object) conversion because frees will be called on the not Address one
-					//if(mi.getName().contains("main"))
+					//if(mi.getName().contains("stringSize"))
 					//	code.getLocalVariableTable().printOut("");
 //					nodeList.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
 					for(LocalVariableInfo info:code.getLocalVariableTable().getTable()) {
@@ -418,17 +429,18 @@ public class F0CrBridge {
 			for(LocalVariableInfo info:code.getLocalVariableTable().getTable()) {
 				if(F0xUtil.convertedType(F0xUtil.convertDescriptor(info.getDesc().charAt(0))) != Node.ADDR)
 					continue;
-				if(array[array.length-1] < info.getStart()+info.getLength() && F0xUtil.calcIndex(context.getParameters(), context.getLocalVariables(), fox.getParser().getAddressSize(), info.getIndex()) >= context.getParameters().size()) {
+				if(array[array.length-1] < info.getStart()+info.getLength() && F0xUtil.calcIndex(context.getParameters(), context.getLocalVariables(), fox.getParser().getAddressSize(), info.getIndex()) >= parameterSize) {
 					nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex())));	
 					nodeList.add(new NodeObject(NodeObject.FREE, null));
 				}
 			}
 			
-			for(int i=code.getLocalVariableTable().getTable().length;i<code.getMaxLocals();i++) {
+			//I don't even remember what the idea was behind this, but it definitely crashes the program in some cases (working at all > clean heap)
+		//	for(int i=code.getLocalVariableTable().getTable().length;i<code.getMaxLocals();i++) {
 				//IS THIS ACTUALLY AN ADDRESS?
-				nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, Integer.toString(i)));	
-				nodeList.add(new NodeObject(NodeObject.FREE, null));
-			}
+				//nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, Integer.toString(i)));	
+				//nodeList.add(new NodeObject(NodeObject.FREE, null));
+		//	}
 			
 			nodeList.add(new NodeStack(Node.INT32, NodeStack.POP_0));
 			//code.getLocalVariableTable().printOut("");
@@ -600,7 +612,7 @@ public class F0CrBridge {
 			int instID = inst.getInstruction()&0xFF;
         	int branchPosition = inst.getBranchInstructionPos();
 			if(inst.getTypeOfBranch() == InstBranch.BRANCH_INVOKE) {
-				int identifierID = inst.getPoolIndex();
+				int identifierID = inst.getPoolIndex()&0xFFFF;
 				Class<?>[] args = F0xUtil.convertFunctionDescriptor(classReader.getPool().get(((NameAndTypeDescriptor)classReader.getPool().get(((MethodReference)classReader.getPool().get(identifierID)).getNameAndType())).getEncodedTypeDescriptor()).toString());
 				int amountOfArguments =	F0xUtil.calcSizeDescriptor(args, fox.getParser().getAddressSize());
 				String ClassPath = classReader.getPool().get(((ClassReference)classReader.getPool().get(((MethodReference)classReader.getPool().get(identifierID)).getClassReference())).getIndex()).toString();
@@ -860,7 +872,7 @@ public class F0CrBridge {
 			list.add(new NodeObject(NodeObject.NEW_ARRAY, Integer.toString(F0xUtil.ARRAY_TYPE_VOID)));
 			list.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
 		}else if(instRaw.getName().equals("MULTIANEWARRAY")) {
-			System.err.println("MULTIANEWARRAY isn't currently implemented. Init Arrays manual instead.");
+			System.err.println("MULTIANEWARRAY isn't currently implemented. Init Arrays manual instead. @ "+context.getFullName());
 		}else if(instRaw.getName().equals("ARRAYLENGTH")) {
 			list.add(new NodeStack(Node.INT32, NodeStack.POP_1));
 			list.add(new NodeObject(NodeObject.ARRAYLENGTH, null));

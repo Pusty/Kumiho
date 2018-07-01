@@ -29,6 +29,11 @@ public class MethodInfo {
 	public int getNameIndex() { return name_index; }
 	public int getAccessFlags() { return access_flags; }
 	public AttributeTable getInfo() { return attribute_table; }
+	
+	public String getDescriptor() {
+		return classReader.getPool().get(descriptor_index).toString();
+	}
+	
 
 	/**
 	 * Returns the name of this method

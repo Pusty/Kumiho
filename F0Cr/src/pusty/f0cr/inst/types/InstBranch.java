@@ -1,11 +1,11 @@
 package pusty.f0cr.inst.types;
 
-import pusty.f0cr.ConstantPool;
+import pusty.f0cr.inst.InstructionReader;
 import pusty.f0cr.inst.Opcodes;
 
 public class InstBranch extends Instruction {
 	protected int type;
-	protected long branchPos;
+	protected int branchPos;
 	protected int poolIndex;
 	/*
 	 * Branches to memory location getBranch()
@@ -13,23 +13,37 @@ public class InstBranch extends Instruction {
 	 * or if integer on stack fulifies Xcc
 	 * or unconditional jump
 	 */
-	public InstBranch(ConstantPool pool, byte inst, byte[] data) {
-		super(pool, inst, data);
+	public InstBranch(InstructionReader reader, byte inst, byte[] data) {
+		super(reader, inst, data);
 		if(!isInst(inst)) {System.err.println("Error: Created Branch with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		type = setType();
 		if(type != BRANCH_SUBROUTINE && type != BRANCH_INVOKE && type != BRANCH_RET && type != BRANCH_RETURN) {
 			if((inst&0xFF) == Opcodes.GOTO_W || (inst&0xFF) == Opcodes.JSR_W) {
-				branchPos = (((data[0]&0xFF) << 24) + ((data[1]&0xFF) << 16) + ((data[2]&0xFF) << 8) + data[3]&0xFF);
+				branchPos = ((int)(((data[0]) << 24) + ((data[1]&0xFF) << 16) + ((data[2]&0xFF) << 8) + (data[3]&0xFF)));
 			}else {
-				branchPos = (((data[0]&0xFF) << 8) + data[1]&0xFF);
+				branchPos = ((int)(((data[0]) << 8) + (data[1]&0xFF)));
 			}
 		}else if(type == BRANCH_INVOKE) {
-			poolIndex = (((data[0]&0xFF) << 8) + data[1]&0xFF);
+			poolIndex = (((data[0]&0xFF) << 8) + (data[1]&0xFF));
 		}
 			
 	}
-	public long getBranchPos() {
+	public String toString() {
+		if(type != BRANCH_SUBROUTINE && type != BRANCH_INVOKE && type != BRANCH_RET && type != BRANCH_RETURN) {
+			return "Branch: "+(reader.getPosition(this,getBranchPos()));
+		}else if(type == BRANCH_INVOKE) {
+			return "Pool: "+pool.get(poolIndex);
+		}
+			return super.toString();
+	}
+	public int getBranchPos() {
 		return branchPos;
+	}
+	public int getBranchInstructionPos() {
+		return (reader.getPosition(this,getBranchPos()));
+	}
+	public Instruction getBranchInstruction() {
+		return reader.getInstruction(reader.getPosition(this,getBranchPos()));
 	}
 	public int getPoolIndex() {
 		return poolIndex;

@@ -16,7 +16,6 @@ import pusty.f0xC.rt.util.*;
 
 public class Parser86 extends Parser {
 
-	OverrideHandler overrideHandler;
 	public Parser86() {
 		super();
 		registerOverrides();
@@ -51,22 +50,21 @@ public class Parser86 extends Parser {
 	public String getLanguageName() {
 		return "x86";
 	}
-	
+	/*
 	@Override
 	public OverrideHandler getOverrideHandler() {
 		return overrideHandler;
-	}
+	}*/
 	
 	public void registerOverrides() {
 		overrideHandler = new OverrideHandler();
-		
 		overrideHandler.registerOverride(OClass.class);
 		overrideHandler.registerOverride(OObject.class);
 
-		
 		overrideHandler.registerOverride(OThrowable.class);
 		overrideHandler.registerOverride(OException.class);
 		overrideHandler.registerOverride(ORuntimeException.class);
+		overrideHandler.registerOverride(OIllegalStateException.class);
 		overrideHandler.registerOverride(OIllegalArgumentException.class);
 		overrideHandler.registerOverride(ONumberFormatException.class);
 		overrideHandler.registerOverride(ONullPointerException.class);
@@ -118,9 +116,8 @@ public class Parser86 extends Parser {
 		overrideHandler.registerOverride(x86Internal.class);
 		overrideHandler.registerOverride(x86InternalObject.class);
 		
-		overrideHandler.process();
 	}
-	
+
 	public static String getStringVarName(String str) {
 		return "stringmap_"+Integer.toHexString(str.hashCode());
 	}
