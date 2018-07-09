@@ -125,9 +125,6 @@ public class Internal {
 		exception_type = type;
 	}
 	
-	
-	
-	
 	@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
 	public static void initStringTable() {
 		int currentAddress = addrStringTableData();
@@ -135,12 +132,12 @@ public class Internal {
 		boolean endOfString = false;
 		int index = 0;
 		byte read = 0;
-		while((read=rawMemoryReadByte(currentAddress))!=0 || !endOfString) {
+		while((read=staticReadByte(currentAddress))!=0 || !endOfString) {
 			if(read == 0) {
 				endOfString = true;
 				byte[] array = new byte[currentAddress-startOfString];
 				for(int i=0;i<currentAddress-startOfString;i++)
-					array[i] = rawMemoryReadByte(startOfString+i);
+					array[i] = staticReadByte(startOfString+i);
 				setStringTable(index, new String(array));
 				inc_memory(getStringTable(index)); //register the newly created string (as it's not referenced automatically through native functions)
 				free_memory(array); //String always does copies so this has to be deleted manually
@@ -196,4 +193,10 @@ public class Internal {
 	public static byte rawMemoryReadByte(int addr) { return (byte)rawMemoryReadInt(addr); }
 	@TranslationProperty(property = TranslationProperty.NO_FRAME)
 	public static int  rawMemoryReadInt(int addr) { return 0; }
+	@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
+	public static byte staticReadByte(int addr) { return (byte)staticReadInt(addr); }
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static int  staticReadInt(int addr) { return 0; }
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static void  breakpoint() { }
 }

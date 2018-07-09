@@ -36,6 +36,19 @@ public abstract class Parser {
 	public abstract String getLanguageName();
 	public void simplify(F0xC fox) {}
 	
+	public String dumpByte(int i) {
+		return Integer.toString(i&0xFF);
+	}
+	
+	public String dumpString(String str) {
+    	String value = "";
+    	for(char c:str.toCharArray()) {
+    		value +=dumpByte(c&0xFF)+", ";
+    	}
+    	value += dumpByte(0);
+    	return value;
+	}
+	
 	public ArrayList<String> parseNode(F0xC fox, ContextClass c, ContextFunction f, Node raw) {
 		ArrayList<String> list = new ArrayList<String>();
 		if(f.containsProperty(TranslationProperty.NATIVE)) return list;

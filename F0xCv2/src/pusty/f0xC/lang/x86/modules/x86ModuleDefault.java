@@ -47,15 +47,6 @@ public class x86ModuleDefault extends F0xModule {
 		list.add("start_function:");
 		
 		fox.getEventHandler().triggerEvent(F0xEventType.Init, new F0xEventParsing(fox, list));
-	
-		for(int i=fox.getRegistedClasses().length-1;i>=0;i--) {
-			ContextClass cc = fox.getRegistedClasses()[i];
-			for(ContextFunction cf:cc.getFunctions()) {
-				if(cf.getFullName().equals("<clinit>()V")) {
-					list.add("call "+x86ModuleDefault.formatFunction(cc.getClassName()+".$clinit$__V"));
-				}
-			}
-		}
 		
 		//TODO: Prepare arguments here!
 		
@@ -73,15 +64,6 @@ public class x86ModuleDefault extends F0xModule {
 			}
 		}
 		
-		for(int i=0;i<fox.getRegistedClasses().length;i++) {
-			ContextClass cc = fox.getRegistedClasses()[i];
-			for(ContextFunction cf:cc.getFunctions()) {
-				if(cf.getFullName().equals("<clinit>()V")) {
-					list.add("call "+x86ModuleDefault.formatFunction(cc.getClassName()+".$cldestroy$"));
-				}
-			}
-		}
-		
 		fox.getEventHandler().triggerEvent(F0xEventType.Free, new F0xEventParsing(fox, list));
 		fox.getEventHandler().triggerEvent(F0xEventType.Diagnostic, new F0xEventParsing(fox, list));
 		
@@ -91,6 +73,30 @@ public class x86ModuleDefault extends F0xModule {
 		list.add("pop reg0");
 		
 		list.add("ret");
+	}
+	
+	@F0xEventSubscription(event=F0xEventType.Init, priority=F0xEventPriority.NORMAL)
+	public void clInit(F0xEventParsing event) { 
+		for(int i=event.getF0xC().getRegistedClasses().length-1;i>=0;i--) {
+			ContextClass cc = event.getF0xC().getRegistedClasses()[i];
+			for(ContextFunction cf:cc.getFunctions()) {
+				if(cf.getFullName().equals("<clinit>()V")) {
+					event.getCurrentList().add("call "+x86ModuleDefault.formatFunction(cc.getClassName()+".$clinit$__V"));
+				}
+			}
+		}
+	}
+	
+	@F0xEventSubscription(event=F0xEventType.Free, priority=F0xEventPriority.NORMAL)
+	public void clDestroy(F0xEventParsing event) { 
+		for(int i=0;i<event.getF0xC().getRegistedClasses().length;i++) {
+			ContextClass cc = event.getF0xC().getRegistedClasses()[i];
+			for(ContextFunction cf:cc.getFunctions()) {
+				if(cf.getFullName().equals("<clinit>()V")) {
+					event.getCurrentList().add("call "+x86ModuleDefault.formatFunction(cc.getClassName()+".$cldestroy$"));
+				}
+			}
+		}
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.StartParsingFunction, priority=F0xEventPriority.NORMAL)
@@ -217,7 +223,7 @@ public class x86ModuleDefault extends F0xModule {
 		if(!node.returnVoid()) {
 			list.add("push reg0");
 			if(node.returnType() == Node.INT64 || node.returnType() == Node.DOUBLE)
-				list.add("push reg2");
+				list.add("push reg3");
 		}
 	}
 	

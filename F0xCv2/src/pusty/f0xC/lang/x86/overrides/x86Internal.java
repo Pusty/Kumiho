@@ -51,4 +51,14 @@ public class x86Internal {
 		list.add("mov reg0, [reg0]");
 	}
 	
+	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.staticReadInt")
+	public static void staticReadInt(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("mov reg0, "+F0xUtil.argS(0, 1)); //address
+		list.add("mov reg0, [reg0]");
+	}
+	
+	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.breakpoint")
+	public static void breakpoint(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("int3"); 
+	}
 }

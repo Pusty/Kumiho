@@ -71,6 +71,9 @@ public final class QuickLZ
 	@SuppressWarnings("unused")
 	public static byte[] compress(byte[] source, int level)
 	{
+		if (level != 1 && level != 3)
+			throw new RuntimeException("Java version only supports level 1 and 3");
+
 		int src = 0;
 		int dst = DEFAULT_HEADERLEN + CWORD_LEN;
 		long cword_val = 0x80000000L;
@@ -83,10 +86,7 @@ public final class QuickLZ
 		int fetch = 0;
 		int last_matchstart = (source.length - UNCONDITIONAL_MATCHLEN - UNCOMPRESSED_END - 1);
 		int lits = 0;
-
-		if (level != 1 && level != 3)
-			throw new RuntimeException("Java version only supports level 1 and 3");
-
+		
 		if (level == 1) {
 			hashtable = new int[HASH_VALUES][];
 			for(int i=0;i<HASH_VALUES;i++) hashtable[i] = new int[QLZ_POINTERS_1];
@@ -319,6 +319,10 @@ public final class QuickLZ
 
 	static public byte[] decompress(byte[] source)
 	{
+		int level = (source[0] >>> 2) & 0x3;
+		if (level != 1 && level != 3)
+			throw new RuntimeException("Java version only supports level 1 and 3");
+		
 		int size = (int)sizeDecompressed(source);
 		int src = headerLen(source);
 		int dst = 0;
@@ -330,9 +334,6 @@ public final class QuickLZ
 		int last_hashed = -1;
 		int hash;
 		int fetch = 0;
-		int level = (source[0] >>> 2) & 0x3;
-		if (level != 1 && level != 3)
-			throw new RuntimeException("Java version only supports level 1 and 3");
 
 		if ((source[0] & 1) != 1)
 		{

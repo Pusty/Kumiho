@@ -30,26 +30,21 @@ public class x86ModuleString extends F0xModule {
 	    }
 	    event.getCurrentList().add("   "+"dd 0");
 	    event.getCurrentList().add("   stringTableData:");
-	    event.getCurrentList().add("   "+Parser86.getStringVarName("")+"_value db "+0); //zero string has to be first
+	    event.getCurrentList().add("   "+Parser86.getStringVarName("")+"_value db "+event.getF0xC().getParser().dumpByte(0)); //zero string has to be first
 	    for(Entry<Integer, String> strMap:event.getF0xC().getStaticStrings().entrySet()) {
 	    	if(strMap.getValue().equals("")) continue;
-	    	String value = "";
-	    	for(char c:strMap.getValue().toCharArray()) {
-	    		value += (c&0xFF)+", ";
-	    	}
-	    	value += "0";
-	    	event.getCurrentList().add("   "+Parser86.getStringVarName(strMap.getValue())+"_value db "+value);
+	    	event.getCurrentList().add("   "+Parser86.getStringVarName(strMap.getValue())+"_value db "+event.getF0xC().getParser().dumpString(strMap.getValue()));
 	    }
-	    event.getCurrentList().add("   "+"dd 0");
+	    event.getCurrentList().add("   "+"dd "+event.getF0xC().getParser().dumpByte(0));
 	}
 	
 
-	@F0xEventSubscription(event=F0xEventType.Init, priority=F0xEventPriority.NORMAL)
+	@F0xEventSubscription(event=F0xEventType.Init, priority=F0xEventPriority.HIGH)
 	public void stringInit(F0xEventParsing event) {
 		event.getCurrentList().add("call "+x86ModuleDefault.formatFunction(F0xStr.strInternalStringTableInit()));
 	}
 	
-	@F0xEventSubscription(event=F0xEventType.Free, priority=F0xEventPriority.NORMAL)
+	@F0xEventSubscription(event=F0xEventType.Free, priority=F0xEventPriority.HIGH)
 	public void stringFree(F0xEventParsing event) { 
 		event.getCurrentList().add("call "+x86ModuleDefault.formatFunction(F0xStr.strInternalStringTableFree()));
 	}

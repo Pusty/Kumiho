@@ -1,68 +1,70 @@
 package kumiho.main;
 
+import java.util.Arrays;
+
+import pusty.f0xC.imports.Internal;
+import pusty.f0xC.rt.windows.Kernel32;
+import pusty.f0xC.rt.windows.WinStruct.HANDLE;
+
 public class KumihoTestcase {
-	//note that "freed memory" value is wrong the moment an array with a size > 65k is initialized
-	//this is more of a "stress" test
-    public static void testRC4() {
-        RC4 rc4 = new RC4();
-    	/*byte[] dataBuffer = new byte[1000];
-    	for(int i=0;i<dataBuffer.length;i++) dataBuffer[i] =(byte)(0x40+(i%24));
-    	byte[] crypt = rc4.encryptMessage(new String(dataBuffer), "This is pretty long key");
-        String msg = rc4.decryptMessage(crypt, "This is pretty long key");
-        System.out.println(msg); */
-        String message = "Hello, World!";
-        String key = "This is pretty long key";
-        byte[] crypt = rc4.encryptMessage(message, key);
-        String msg = rc4.decryptMessage(crypt, key);
-        System.out.println(message+" == "+msg);
-    }
-    public static String b128Key = "0123456789ABCDEF";
-    public static String b128Data = "Hello, World!!!1";
-	public static byte[] bufferEnc = new byte[8*2];
-	public static byte[] bufferDec = new byte[8*2];
-	
-    public static void testXTEA() {
-    	XTEA xtea = new XTEA();
-    	xtea.setKey(b128Key.getBytes());
-    	xtea.encrypt(b128Data.getBytes(), bufferEnc, 0, 8*2);
-    	xtea.decrypt(bufferEnc, bufferDec, 0, 8*2);
-    	System.out.println(b128Data+" == "+new String(bufferDec));
-    }
-   /* public static void testBlowfish() {
-    	Blowfish blowfish = new Blowfish();
-    	blowfish.setKey(b128Key.getBytes());
-    	blowfish.encrypt(b128Data.getBytes(), bufferEnc, 0, 8*2);
-    	blowfish.decrypt(bufferEnc, bufferDec, 0, 8*2);
-    	System.out.println(b128Data+" == "+new String(bufferDec));
-    }*/
-    /*public static void testAES() {
-    	AES aesEnc = new AES();
-    	AES aesDec = new AES();
-    	aesEnc.setKey(b128Key.getBytes(), true);
-    	aesDec.setKey(b128Key.getBytes(), false);
-    	aesEnc.encrypt(b128Data.getBytes(), bufferEnc, 0, 16);
-    	aesDec.decrypt(bufferEnc, bufferDec, 0, 16);
-    	System.out.println(b128Data+" == "+new String(bufferDec));
-    }*/
-    
-    //there is a bug somewhere causing this to crash from a specific size on... (>=10000)
-    public static void testQuickLZ() {
-    	byte[] dataBuffer = new byte[1000];
-    	for(int i=0;i<dataBuffer.length;i++) dataBuffer[i] =(byte)(0x40+(i%24));
-    	byte[] data1 = QuickLZ.compress(dataBuffer, 1);
-    	byte[] data3 = QuickLZ.compress(dataBuffer, 3);
-    	System.out.println("Data Size: (0)["+dataBuffer.length+"] (1)["+data1.length+"] (3)["+data3.length+"]");
-    	System.out.println(new String(QuickLZ.decompress(data1))+" == "+new String(QuickLZ.decompress(data3)));
-    }
+
 	public static void main(String[] args) {
-		//for(int i=0;i<10;i++)
-		//	System.out.print((char)Kumiho.rawFile[i]);
-    	//testRC4(); //2.5KB binary size, 2KB Heap
-    	//testXTEA(); //2.5KB binary size, 2KB Heap
-    	//testBlowfish(); //4KB heap not freed -> works, adds about 40KB binary size
-    	//testAES(); //crashes, I think it's because of the 'gigantic' (100KB) lookup table
-    	//testQuickLZ(); //500KB Heap, 14KB Binary size
+		System.out.println("Starting...");
+		System.out.println("Hash of Data: "+Integer.toHexString(Arrays.hashCode(Kumiho.rawFile))); //this doesn't free correctly!
+		HANDLE hObj = Kernel32.GetModuleHandle(null);
+
+		KumihoPEReader peIncl = new KumihoPEReader(Kumiho.rawFile);
+		//KumihoPEReader peThis = new KumihoPEReader(hObj.handle);
+		
+		Integer oldProtect = Integer.valueOf(0);
+		Kernel32.VirtualProtect(hObj.handle, peIncl.SizeOfImage, Kernel32.PAGE_EXECUTE_READWRITE, oldProtect);
+		
+		//Copy physical data to virtual positions
+		for(int i=0;i<peIncl.NumberOfSections;i++) {
+			for(int t=0;t<peIncl.SizeOfRawData[i];t++)
+				Internal.rawMemoryWriteByte(hObj.handle+peIncl.VirtualAddress[i]+t, Kumiho.rawFile[peIncl.PointerToRawData[i]+t]);
+		}
+		
+		System.out.println("Finished rebuilding sections..");
+		
+		//Import rebuilding
+		if(peIncl.ImageDirectoryEntryImport != 0) {
+			int pImportDescriptor = hObj.handle+peIncl.ImageDirectoryEntryImport;
+			while(Internal.rawMemoryReadInt(pImportDescriptor+0xC) != 0) {
+				int pName = Internal.rawMemoryReadInt(pImportDescriptor+0xC);
+				int lpLibrary = hObj.handle+pName;
+				int hLibModule = Kernel32._GetModuleHandleA(lpLibrary);
+				if(hLibModule == 0)
+					hLibModule = Kernel32._LoadLibraryA(lpLibrary);
+		
+				int pNameRef = hObj.handle+Internal.rawMemoryReadInt(pImportDescriptor);
+				int lpThunk = hObj.handle+Internal.rawMemoryReadInt(pImportDescriptor+0x10);
+				
+				while(Internal.rawMemoryReadInt(pNameRef) != 0) {
+					int nameRef = Internal.rawMemoryReadInt(pNameRef);
+					if((nameRef & 0x80000000)!=0) {
+						Internal.rawMemoryWriteInt(lpThunk, Kernel32._GetProcAddress(nameRef^0x80000000,hLibModule));
+					}else {
+						Internal.rawMemoryWriteInt(lpThunk, Kernel32._GetProcAddress(hObj.handle+nameRef+2,hLibModule));
+					}
+					pNameRef += 0x4;
+					lpThunk += 0x4;
+				}
+				
+				pImportDescriptor = pImportDescriptor + 0x14;
+			}
+			
+		}
+
+		System.out.println("Finished importing..");
+		System.out.println();
+		//Kumiho.jumpOut(hObj.handle+peIncl.AddressOfEntryPoint);
+		jumpOut = hObj.handle+peIncl.AddressOfEntryPoint;
+		//Kernel32.VirtualProtect(hObj.handle, peIncl.SizeOfImage, oldProtect, 0);
+		
     }
+	
+	public static int jumpOut;
    
     
 }

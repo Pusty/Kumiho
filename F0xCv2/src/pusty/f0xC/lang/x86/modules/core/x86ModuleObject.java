@@ -97,12 +97,12 @@ public class x86ModuleObject extends F0xModule {
 		event.getCurrentList().add("array_class: storeref "+x86ModuleDefault.formatFunction("array_$destroy$"));;
 		event.getCurrentList().add("storeref array_name");
 
-    	for(ContextClass c:event.getF0xC().getRegistedClasses()) {
-    		String name = c.getClassName().replace('/', '_')+"_name";
-    		event.getCurrentList().add(name+" db \""+c.getClassName()+"\", 0");
+    	for(ContextClass cc:event.getF0xC().getRegistedClasses()) {
+    		String name = cc.getClassName().replace('/', '_')+"_name";
+	    	event.getCurrentList().add(name+" db "+event.getF0xC().getParser().dumpString(cc.getClassName()));
     	}
-    	event.getCurrentList().add("array_name db \"Array(?)[]\",0");
-    	event.getCurrentList().add("aarray_name db \"Array(Object)[]\",0");
+    	event.getCurrentList().add("array_name db "+event.getF0xC().getParser().dumpString("Array(?)[]"));
+    	event.getCurrentList().add("aarray_name db "+event.getF0xC().getParser().dumpString("Array(Object)[]"));
 	    event.getCurrentList().add("empty db \" \",0");
 	}
 	
@@ -316,7 +316,7 @@ public class x86ModuleObject extends F0xModule {
 		if(!node.returnVoid()) {
 			list.add("push reg0");
 			if(node.returnType() == Node.INT64 || node.returnType() == Node.DOUBLE)
-				list.add("push reg2");
+				list.add("push reg3");
 		}
 	}
 	

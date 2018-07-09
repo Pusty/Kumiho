@@ -7,25 +7,26 @@ public class Kumiho {
 
 	public static byte[] rawFile;
 	
-//	@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
+	//@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
 	public static void initFile() {
 		int size = Internal.rawMemoryReadInt(addrIncludeLen());
 		int currentAddress = addrInclude();
 		byte[] raw = new byte[size];
 		for(int i=0;i<size;i++)
-			raw[i] = Internal.rawMemoryReadByte(currentAddress+i);
+			raw[i] = Internal.staticReadByte(currentAddress+i);
 		
 		byte[] xteaOut = new byte[size];
 		XTEA xtea = new XTEA();
 		xtea.setKey("0123456789ABCDEF".getBytes());
 		xtea.decrypt(raw, xteaOut, 0, size);
-		rawFile = xteaOut;
-		//rawFile = QuickLZ.decompress(xteaOut);
+		//rawFile = xteaOut;
+		rawFile = QuickLZ.decompress(xteaOut);
 	}
 	
 	@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
 	public static void freeFile() {
 		Internal.free_memory(rawFile);
+		Internal.free_memory(rawFile); //double free because of weirdness
 	}
 	
 	
@@ -36,4 +37,9 @@ public class Kumiho {
 	public static int addrIncludeLen() { return 0;}
 	@TranslationProperty(property = TranslationProperty.NO_FRAME)
 	public static int addrInclude() { return 0;}
+	
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static void jumpOut(int pos) {}
+	
+	
 }

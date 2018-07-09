@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import kumiho.modified.x86InternalXOR;
 import pusty.f0cr.bridge.F0CrBridge;
 import pusty.f0xC.ContextClass;
 import pusty.f0xC.F0xC;
@@ -20,11 +21,18 @@ public class KumihoSetup {
 		String path = System.getProperty("user.dir")+"/bin/";
 		String mainClass = "kumiho/main/KumihoTestcase";
 		//F0xC.DEBUG_MODE=false;
-
-		F0xC fox = new F0xC(new Parser86());
+		int xorKey = 0xABABABAB;
+		F0xC fox = new F0xC(new Parser86() {
+			@Override
+			public String dumpByte(int i) {
+				return Integer.toString((i&0xFF)^(xorKey&0xFF));
+			}
+		});
 		
 		//register overwrite of x86Kumiho
 		fox.getParser().getOverrideHandler().registerOverride(x86Kumiho.class);
+		x86InternalXOR.XOR_KEY = xorKey;
+		fox.getParser().getOverrideHandler().registerOverride(x86InternalXOR.class);
 		
 		ArrayList<String> slist = new ArrayList<String>();
 		slist.add("pusty/f0xC/imports/Internal");
@@ -35,6 +43,7 @@ public class KumihoSetup {
 			c.computeIndex(fox.getParser().getAddressSize(), fox.getRegistedClasses());
 			c.processFunctions(fox.getRegistedClasses());
 		}
+		
 		//Currently Registering has to be done after processing
 		fox.getEventHandler().registerModule(new x86ModuleDefault());
 		fox.getEventHandler().registerModule(new x86ModuleFASM());
@@ -49,8 +58,8 @@ public class KumihoSetup {
 		fox.getEventHandler().registerModule(new x86ModuleDouble());
 		fox.getEventHandler().registerModule(new x86ModuleLong());
 		
-		fox.getEventHandler().registerModule(new x86KumihoFile(new File("test.asm")));
-		//fox.getEventHandler().registerModule(new x86KumihoFile(new File("example.exe")));
+		//fox.getEventHandler().registerModule(new x86IncludeEncryptedFile(new File("test.asm")));
+		fox.getEventHandler().registerModule(new x86IncludeEncryptedFile(new File("example.exe")));
 		
 		while(!fox.isDone())
 			fox.iterate();

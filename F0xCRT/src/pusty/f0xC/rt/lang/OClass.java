@@ -35,7 +35,7 @@ public class OClass<T>  {
 		int strAddr = InternalObject.getClassName(structAddr);
 		char lastRead = 1;
 		for(int index=0;;index++) {
-			lastRead = (char)Internal.rawMemoryReadByte(strAddr+index);
+			lastRead = (char)Internal.staticReadByte(strAddr+index);
 			if(lastRead == 0) break;
 			if(lastRead == '/')
 				lastRead = '.';

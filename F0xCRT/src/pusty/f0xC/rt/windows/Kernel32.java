@@ -216,6 +216,7 @@ public class Kernel32 {
 	public static native int _GetModuleHandleA(int lpModuleName);
 	
 	public static HANDLE GetModuleHandle(String lpModuleName) {
+		if(lpModuleName == null) return new HANDLE(_GetModuleHandleA(0));
 		return new HANDLE(_GetModuleHandleA(InternalObject.arr2int(LibC.JString2CString(lpModuleName))));
 	}
 	
@@ -251,7 +252,20 @@ public class Kernel32 {
 				);
 	}
 	
-
+	@TranslationProperty(property=TranslationProperty.EXTERNAL_STDCALL)
+	@ExternalProperty(property=ExternalProperty.IMPORT, parent="kernel32", key="VirtualProtect")
+	public static native int _VirtualProtect(int lpflOldProtect, int flNewProtect, int dwSize, int lpAddress);
+	
+	public static int VirtualProtect(int lpAddress, int dwSize, int flNewProtect, Integer lpflOldProtect) {
+		return _VirtualProtect(
+				InternalObject.con2int(lpflOldProtect),
+				flNewProtect,
+				dwSize,
+				lpAddress
+				);
+	}
+	
+	
 	@TranslationProperty(property=TranslationProperty.EXTERNAL_STDCALL)
 	@ExternalProperty(property=ExternalProperty.IMPORT, parent="kernel32", key="VirtualAllocEx")
 	public static native int _VirtualAllocEx(int flProtect, int flAllocationType, int dwSize, int lpAddress, int hProcess);
