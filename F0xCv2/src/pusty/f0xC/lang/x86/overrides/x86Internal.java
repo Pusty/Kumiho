@@ -13,7 +13,7 @@ public class x86Internal {
 	
 	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.getNextAddress")
 	public static void getNextAddress(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
-		list.add("mov reg0, [regS]");
+		list.add("mov reg0, [regB+addrsize]");
 	}
 	
 	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.getFramePointer")
@@ -60,5 +60,11 @@ public class x86Internal {
 	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.breakpoint")
 	public static void breakpoint(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
 		list.add("int3"); 
+	}
+	
+	@OverrideTranslation(override = "pusty/f0xC/imports/Internal.setReturnAddress")
+	public static void setReturnAddress(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("mov reg0, "+F0xUtil.argS(0, 1)); 
+		list.add("mov [regB+addrsize], reg0"); 
 	}
 }

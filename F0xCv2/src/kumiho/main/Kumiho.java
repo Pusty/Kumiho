@@ -1,6 +1,9 @@
 package kumiho.main;
 
+import kumiho.crypto.QuickLZ;
+import kumiho.crypto.XTEA;
 import pusty.f0xC.imports.Internal;
+import pusty.f0xC.imports.InternalObject;
 import pusty.f0xC.lang.OverrideHandler.TranslationProperty;
 
 public class Kumiho {
@@ -25,8 +28,9 @@ public class Kumiho {
 	
 	@TranslationProperty(property = TranslationProperty.INTERNAL_NOGBC)
 	public static void freeFile() {
-		Internal.free_memory(rawFile);
-		Internal.free_memory(rawFile); //double free because of weirdness
+		int a = InternalObject.getRef(rawFile);
+		for(int i=0;i<a;i++)
+			Internal.free_memory(rawFile);
 	}
 	
 	
@@ -39,7 +43,21 @@ public class Kumiho {
 	public static int addrInclude() { return 0;}
 	
 	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static int addrStartFree() { return 0;}
+	
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
 	public static void jumpOut(int pos) {}
-	
-	
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static void callOut(int pos) {}
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static void callTLS(int pos, int base, int type, int resv) {}
+
+	public static void hookExitProcess(int exitCode) {
+		System.out.println();
+		System.out.println("Exit Process Hook Called!");
+		//LibC.exit(0);
+		Internal.setReturnAddress(Kumiho.addrStartFree());
+	}
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static int hookExitProcessAddr() { return 0;	}
 }

@@ -46,11 +46,14 @@ public class x86ModuleDefault extends F0xModule {
 		list.add("");
 		list.add("start_function:");
 		
+		
+		list.add("start_function_init:");
 		fox.getEventHandler().triggerEvent(F0xEventType.Init, new F0xEventParsing(fox, list));
 		
 		//TODO: Prepare arguments here!
 		
 		//CALL MAIN FUNCTION!
+		list.add("start_function_main:");
 		boolean mainClass = false;
 		for(ContextClass cla:fox.getRegistedClasses()) {
 			for(ContextFunction func:cla.getFunctions()) {
@@ -63,10 +66,12 @@ public class x86ModuleDefault extends F0xModule {
 				}
 			}
 		}
-		
+		list.add("start_function_free:");
 		fox.getEventHandler().triggerEvent(F0xEventType.Free, new F0xEventParsing(fox, list));
+		list.add("start_function_diag:");
 		fox.getEventHandler().triggerEvent(F0xEventType.Diagnostic, new F0xEventParsing(fox, list));
 		
+		list.add("start_function_exit:");
 		list.add("mov reg0, 0");
 		list.add("push reg0");
 		list.add("  call "+x86ModuleDefault.formatFunction(F0xStr.strInternalExit()));    //exit!

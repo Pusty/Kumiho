@@ -108,7 +108,7 @@ public class OCharacter {
     
     public static int toLowerCase(int codePoint) {
     	if(isAlphabetic(codePoint))
-    		return codePoint | 0x40;
+    		return codePoint | 0x20;
     	else
     		return codePoint;
     }
@@ -119,7 +119,7 @@ public class OCharacter {
     
     public static int toUpperCase(int codePoint) {
     	if(isAlphabetic(codePoint))
-    		return codePoint & (~0x40);
+    		return codePoint & (~0x20);
     	else
     		return codePoint;
     }

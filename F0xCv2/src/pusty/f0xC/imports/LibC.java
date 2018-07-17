@@ -51,4 +51,13 @@ public class LibC {
 		return wideStr;
 	}
 
+	public static String CString2JString(int address) {
+		int size = 0;
+		while(Internal.rawMemoryReadByte(address+size)!=0)size++;
+		if(size == 0) return null;
+		byte[] asciiStr = new byte[size];
+		for(int i=0;i<size;i++)
+			asciiStr[i] = Internal.rawMemoryReadByte(address+i);
+		return new String(asciiStr);
+	}
 }

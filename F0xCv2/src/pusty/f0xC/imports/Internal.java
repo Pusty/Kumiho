@@ -15,7 +15,7 @@ public class Internal {
 	public static int freeCalls;
 	public static int freedMemory;
 	
-	private static int lastMarkedAddress; //marking addresses for debug and exception reasons
+	public static int lastMarkedAddress; //marking addresses for debug and exception reasons
 	private static GarbageCollector gbCollector;
 	private static int gbStatus; // garbage collector, gb = 0 -> working, gb = ebp -> freeze until hit
 	
@@ -199,4 +199,6 @@ public class Internal {
 	public static int  staticReadInt(int addr) { return 0; }
 	@TranslationProperty(property = TranslationProperty.NO_FRAME)
 	public static void  breakpoint() { }
+	@TranslationProperty(property = TranslationProperty.NO_FRAME)
+	public static void  setReturnAddress(int addr) {}
 }

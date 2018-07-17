@@ -20,10 +20,37 @@ public class x86Kumiho {
 		list.add("lea reg0, [includedFile]");
 	}
 	
+	@OverrideTranslation(override = "kumiho/main/Kumiho.addrStartFree")
+	public static void addrStartFree(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("lea reg0, [start_function_diag]");
+	}
+	
 	@OverrideTranslation(override = "kumiho/main/Kumiho.jumpOut")
 	public static void jumpOut(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
 		list.add("mov reg0, "+F0xUtil.argS(0, 1)); //address
 		list.add("jmp reg0");
 	}
+	
+	@OverrideTranslation(override = "kumiho/main/Kumiho.callOut")
+	public static void callOut(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("mov reg0, "+F0xUtil.argS(0, 1)); //address
+		list.add("call reg0");
+	}
+	
+	
+	@OverrideTranslation(override = "kumiho/main/Kumiho.callTLS")
+	public static void callTLS(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("mov reg0, "+F0xUtil.argS(0, 4)); //address
+		list.add("push addrname "+F0xUtil.argS(3, 4)); //resv
+		list.add("push addrname "+F0xUtil.argS(2, 4)); //type of tls call
+		list.add("push addrname "+F0xUtil.argS(1, 4)); //base
+		list.add("call reg0");
+	}
+	
+	@OverrideTranslation(override = "kumiho/main/Kumiho.hookExitProcessAddr")
+	public static void hookExitProcessAddr(F0xC fox, Parser86 parser, ArrayList<String> list, NodeCustom node) {
+		list.add("lea reg0, [function_kumiho_main_Kumiho_hookExitProcess_I_V_line_start]");
+	}
+	
 	
 }

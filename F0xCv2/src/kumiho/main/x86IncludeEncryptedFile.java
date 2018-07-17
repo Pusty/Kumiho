@@ -5,6 +5,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.Arrays;
 
+import kumiho.crypto.QuickLZ;
+import kumiho.crypto.XTEA;
 import kumiho.modified.x86InternalXOR;
 import pusty.f0xC.module.F0xEventSubscription;
 import pusty.f0xC.module.F0xModule;
@@ -46,13 +48,12 @@ public class x86IncludeEncryptedFile extends F0xModule {
 	public void startParsingCode(F0xEventParsing event) {
 		event.getCurrentList().add("; FASM DEBUG MACROS [HEADER AND SECTION ALIGNMENT]");
 		event.getCurrentList().add("format PE console");
-		//event.getCurrentList().add("format PE GUI");
 		event.getCurrentList().add("entry start_function");
 		event.getCurrentList().add("include 'C:\\fasm\\INCLUDE\\win32a.inc'");
 		event.getCurrentList().add("");
 		/* tbh this is pretty stupid, but I don't know how to do this with FASM */
 		/* A virtual offset / section would be WAAAY better */
-		event.getCurrentList().add("section '.orig' code readable writeable executable");
+		event.getCurrentList().add("section '.orig' data readable");
 		event.getCurrentList().add("repeat "+virtualSize);	
 		event.getCurrentList().add("db 0");
 		event.getCurrentList().add("end repeat");
@@ -88,12 +89,13 @@ public class x86IncludeEncryptedFile extends F0xModule {
 	    event.getCurrentList().add("");
 	    event.getCurrentList().add(";File include");  
 	    event.getCurrentList().add("   includedFileLen dd "+d.length);
-    	String value = "";
+    	StringBuilder value = new StringBuilder();
     	for(byte c:d) {
-    		value += (event.getF0xC().getParser().dumpByte(c&0xFF))+", ";
+    		value.append(event.getF0xC().getParser().dumpByte(c&0xFF));
+    		value.append(", ");
     	}
-    	value += event.getF0xC().getParser().dumpByte(0);
-    	event.getCurrentList().add("   includedFile db "+value);    	
+    	value.append(event.getF0xC().getParser().dumpByte(0));
+    	event.getCurrentList().add("   includedFile db "+value.toString());    	
 	}
 	
 	@F0xEventSubscription(event=F0xEventType.Init, priority=F0xEventPriority.LOW)
@@ -127,8 +129,8 @@ public class x86IncludeEncryptedFile extends F0xModule {
 	//Jump out at the end!
 	@F0xEventSubscription(event=F0xEventType.Diagnostic, priority=F0xEventPriority.LOW)
 	public void jumpToUnpacked(F0xEventParsing event) {
-		event.getCurrentList().add("mov reg0, [kumiho_main_KumihoTestcase_jumpOut]");
-		event.getCurrentList().add("jmp reg0");
+	//	event.getCurrentList().add("mov reg0, [kumiho_main_KumihoTestcase_jumpOut]");
+	//	event.getCurrentList().add("jmp reg0");
 	}
 	
 	

@@ -59,7 +59,7 @@ public class KumihoSetup {
 		fox.getEventHandler().registerModule(new x86ModuleLong());
 		
 		//fox.getEventHandler().registerModule(new x86IncludeEncryptedFile(new File("test.asm")));
-		fox.getEventHandler().registerModule(new x86IncludeEncryptedFile(new File("example.exe")));
+		fox.getEventHandler().registerModule(new x86IncludeEncryptedFile(new File("NoREpls.exe")));
 		
 		while(!fox.isDone())
 			fox.iterate();
