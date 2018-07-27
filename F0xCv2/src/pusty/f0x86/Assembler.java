@@ -15,7 +15,7 @@ public class Assembler {
 		public byte[] getData() { return new byte[] {}; }
 		public String getLine() { return line; }
 		public void throwError(String reason) {
-			System.err.println("Error@Line "+lineNr+" ("+line+") ["+reason+"]");
+			System.out.println("Error@Line "+lineNr+" ("+line+") ["+reason+"]");
 		}
 		public String toString() {
 			return "Generic Node '"+line+"'";
@@ -128,6 +128,7 @@ public class Assembler {
 				l.add(l2);
 			}
 			fstream.close();
+			System.out.println("File read..");
 			//		Files.readAllLines(file.toPath(), Charset.defaultCharset());
 			String fileContent = "";
 			for(String line:l)
@@ -136,13 +137,13 @@ public class Assembler {
 			for(int i=0;i<lines.length;i++) {
 				String line = lines[i].trim();
 				line = line.split(";")[0].trim();
-				if(line.equals("")) continue;
+				if(line.length() == 0) continue;
 				if(line.contains(":")) {
 					content.add(new NodeLabel(line.split(":")[0].trim(),i));
 					if(line.split(":").length == 2)
 						content.add(new NodeInst(line.split(":")[1].trim(),i));
 					else if(line.split(":").length > 2)
-						System.err.println("Error@Line"+i+" at more than one ':'");
+						System.out.println("Error@Line"+i+" at more than one ':'");
 					continue;
 				}
 				if(line.startsWith("#")) {
@@ -151,6 +152,7 @@ public class Assembler {
 				}
 				content.add(new NodeInst(line,i));
 			}
+			System.out.println("Finished adding nodes");
 			
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -159,6 +161,7 @@ public class Assembler {
 	
 	public void processNodes(int codeBase) {
 		for(Node node:content) {
+			System.out.println(node);
 			if(node instanceof NodeInst) {
 				NodeInst nodeI = (NodeInst)node;
 				if(containsLabel(nodeI)) {

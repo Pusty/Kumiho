@@ -15,6 +15,14 @@ public class Instruction {
 	byte[]    opcode;
 	String[] opcode_params;
 	
+	//Helper function
+	public static boolean isHex(String str) {
+		String search = "0123456789abcdefABCDEFxX";
+		for(char c:str.toCharArray())
+			if(!search.contains(Character.toString(c))) return false;
+		return true;
+	}
+	
 	public Instruction(String line) {
 		String prefix = line.substring(0, 2);
 		
@@ -36,16 +44,18 @@ public class Instruction {
 		}else {
 			this.mnemonic = mnemonics.substring(0, mnemonics.indexOf(' ')).trim().toLowerCase();
 			this.mnemonic_params = mnemonics.substring(mnemonics.indexOf(' ')).split(",");
-			System.out.println(mnemonics.substring(mnemonics.indexOf(' ')));
-			System.out.println(Arrays.toString(this.mnemonic_params));
+			//System.out.println(mnemonics.substring(mnemonics.indexOf(' ')));
+			//System.out.println(Arrays.toString(this.mnemonic_params));
 		}
 		for(int i=0;i<this.mnemonic_params.length;i++) this.mnemonic_params[i] = this.mnemonic_params[i].trim().toLowerCase();
 		String[] opcodes   = line.split(";")[0].trim().split(" ");
 		ArrayList<Byte> opcode = new ArrayList<Byte>();
 		for(int i=0;i<opcodes.length;i++) {
 			try {
+				if(!isHex(opcodes[i])) break;
 				opcode.add((byte) Integer.parseInt(opcodes[i], 16));
 			}catch(Exception e) {
+				e.printStackTrace();
 				break;
 			}
 		}
@@ -87,20 +97,22 @@ public class Instruction {
 			return output;
 		}
 		try {
-			long value = parseNumber(input);
-			if(value <= 0xFF && value >= -0x7F)
-				output = "ib";
-			else if(value <= 0xFFFF && value >= -0x7FFF)
-				output = "iw";
-			else if(value <= 0xFFFFFFFFL && value >= -0x7FFFFFFFL)
-				output = "id";
-			else if(value <= 0x7FFFFFFFFFFFFFFFL && value >= -0x7FFFFFFFFFFFFFFFL)
-				output = "iq";
-			else
-				if(DEBUG)
-					System.err.println("Instruction.java@classifyValue: Unknown Immediate Value");
-			return output;
-		}catch(Exception e) {}
+			if(Instruction.isHex(input)) {
+				long value = parseNumber(input);
+				if(value <= 0xFF && value >= -0x7F)
+					output = "ib";
+				else if(value <= 0xFFFF && value >= -0x7FFF)
+					output = "iw";
+				else if(value <= 0xFFFFFFFFL && value >= -0x7FFFFFFFL)
+					output = "id";
+				else if(value <= 0x7FFFFFFFFFFFFFFFL && value >= -0x7FFFFFFFFFFFFFFFL)
+					output = "iq";
+				else
+					if(DEBUG)
+						System.err.println("Instruction.java@classifyValue: Unknown Immediate Value");
+				return output;
+			}
+		}catch(Exception e) { e.printStackTrace(); }
 		int size = 0;
 		if(input.contains(" ")) {
 			String keyword = input.substring(0, input.indexOf(" "));
@@ -136,6 +148,7 @@ public class Instruction {
 	
 	//Confirm that this is a valid type
 	public boolean isType(String type) {
+		if(type == null) return false;
 		if(type.equalsIgnoreCase("rb") || type.equalsIgnoreCase("rw")  || type.equalsIgnoreCase("rd") || type.equalsIgnoreCase("rq")) return true;
 		if(type.equalsIgnoreCase("rmb")|| type.equalsIgnoreCase("rmw") || type.equalsIgnoreCase("rmd") || type.equalsIgnoreCase("rmq")) return true;
 		if(type.equalsIgnoreCase("mb") || type.equalsIgnoreCase("mw")  || type.equalsIgnoreCase("md") || type.equalsIgnoreCase("mq") || type.equalsIgnoreCase("mu")) return true; //DOES THIS EVEN EXIST?
@@ -273,7 +286,7 @@ public class Instruction {
 				try {
 					displacement = (int) (displacement + parseNumber(p));
 					found = true;
-				}catch(Exception e){}
+				}catch(Exception e){ e.printStackTrace(); }
 			}
 			if(!found && Register.getRegister(p)!=null) {
 				if(register1 == null) register1 = p;
@@ -296,7 +309,7 @@ public class Instruction {
 						}
 						else if(DEBUG) System.err.println("Instruction.java@formatExpression: Too many registers referenced ("+p+")");
 						found = true;
-					}catch(Exception e) {}
+					}catch(Exception e) { e.printStackTrace(); }
 				}else if(Register.getRegister(partB)!=null){
 					try {
 						if(multiply != 0) if(DEBUG) System.err.println("Instruction.java@formatExpression: Too much multiplication ("+p+")");
@@ -309,7 +322,7 @@ public class Instruction {
 						}
 						else if(DEBUG) System.err.println("Instruction.java@formatExpression: Too many registers referenced ("+p+")");
 						found = true;
-					}catch(Exception e) {}
+					}catch(Exception e) { e.printStackTrace(); }
 				}
 			}
 			if(!found) if(DEBUG) System.err.println("Instruction.java@formatExpression: Junk expression ("+p+")");
@@ -484,7 +497,8 @@ public class Instruction {
 				System.arraycopy(a, 0, output, outputIndex, a.length);
 			}catch(NullPointerException e) {
 				if(DEBUG)
-				System.err.println("Failed at opcode_parameter "+opcode_params[i]+" in "+toString());
+				System.out.println("Failed at opcode_parameter "+opcode_params[i]+" in "+toString());
+				e.printStackTrace();
 				return null;
 			}
 			outputIndex = outputIndex + a.length;

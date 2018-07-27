@@ -40,7 +40,7 @@ public class F0x86 {
 					list_inst.add(inst);
 					list_int.add(data_encode.length);
 				}
-			}catch(Exception e){}
+			}catch(Exception e){e.printStackTrace();}
 		}
 		if(list_inst.size() == 0) {
 			try {
@@ -51,7 +51,7 @@ public class F0x86 {
 						list_int.add(data_encode.length);
 					}
 				}
-			}catch(Exception e){}
+			}catch(Exception e){e.printStackTrace();}
 		}
 		if(list_inst.size() == 0)
 			return null;	
@@ -78,7 +78,7 @@ public class F0x86 {
 			String disasm = inst.decodeInstruction(data);
 			if(disasm != null) 
 				return disasm;
-			}catch(Exception e){}
+			}catch(Exception e){e.printStackTrace();}
 		} return null;
 	}
 
@@ -86,7 +86,9 @@ public class F0x86 {
 	public static void main(String[] args) {
 		F0x86 fox = new F0x86();
 		Assembler assembler = new Assembler(fox);
+		System.out.println("Creating Assembler");
 		assembler.parseFile(new File("test.asm"));
+		System.out.println("Read file..");
 		assembler.processNodes(0x401000);	
 		System.out.println(assembler.hexify());
 		//System.out.println(fox.assembleFile(new File("test.asm")));

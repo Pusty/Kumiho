@@ -120,9 +120,11 @@ public class OArrayList<E> extends OList<E> {
     public <T> T[] toArray(T[] a) {
         if (a.length < size)
             return (T[]) OArrays.copyOf(elementData, size);
-        System.arraycopy(elementData, 0, a, 0, size);
-        if (a.length > size)
-            a[size] = null;
+        //System.arraycopy(elementData, 0, a, 0, size);
+        for(int i=0;i<size;i++)
+        	a[i] = (T) elementData[i];
+        for(int i=size;i<a.length;i++)
+            a[i] = null;
         return a;
     }
     

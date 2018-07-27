@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import pusty.f0cr.ClassReader;
 import pusty.f0cr.attribute.CodeAttribute;
+import pusty.f0cr.attribute.LocalVariableTableAttribute;
 import pusty.f0cr.attribute.RuntimeInvisibleAnnotationsAttribute;
 import pusty.f0cr.data.AttributeInfo;
 import pusty.f0cr.data.ElementValuePair;
@@ -398,17 +399,10 @@ public class F0CrBridge {
 				    }*/
 					
 					Instruction value = code.getInst().getInstructionMap().get(key);
-					ArrayList<Node> list = convertInst(fox, key, value, context, replaceMap);
+					ArrayList<Node> list = convertInst(fox, key, value, context, replaceMap, code.getLocalVariableTable());
 					
-					
-					//TODO: Apperently the same Variable index can be given twice. This is critical for a (Not Object) to (Object) conversion because frees will be called on the not Address one
-					//if(mi.getName().contains("stringSize"))
-					//	code.getLocalVariableTable().printOut("");
-//					nodeList.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
 					for(LocalVariableInfo info:code.getLocalVariableTable().getTable()) {
 						int convSize = F0xUtil.convertedType(F0xUtil.convertDescriptor(info.getDesc().charAt(0)));
-						//if(mi.getName().contains("main"))
-						//	System.out.println(info.getName()+"->"+o2is(context, info.getIndex()));
 						if(key == info.getStart()+info.getLength() && info.getIndex() >= context.getParameters().size()) {
 							if(convSize == Node.ADDR) {
 								nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex())));	
@@ -418,7 +412,6 @@ public class F0CrBridge {
 							nodeList.add(new NodeVarFix(convSize, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, info.getIndex())));	
 						}
 					}
-					//nodeList.add(new NodeStack(Node.INT32, NodeStack.POP_0));
 					nodeList.addAll(list);
 				}
 			}
@@ -426,9 +419,12 @@ public class F0CrBridge {
 			nodeList.add(new NodeLabel(-1));
 			nodeList.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
 			
+			int lastIndexFreed = -1;
 			for(LocalVariableInfo info:code.getLocalVariableTable().getTable()) {
 				if(F0xUtil.convertedType(F0xUtil.convertDescriptor(info.getDesc().charAt(0))) != Node.ADDR)
 					continue;
+				if(info.getIndex() > lastIndexFreed) lastIndexFreed = info.getIndex(); //to prevent freeing the same variable twice because it was assigned to be store object more than once
+				else continue;
 				if(array[array.length-1] < info.getStart()+info.getLength() && F0xUtil.calcIndex(context.getParameters(), context.getLocalVariables(), fox.getParser().getAddressSize(), info.getIndex()) >= parameterSize) {
 					nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex())));	
 					nodeList.add(new NodeObject(NodeObject.FREE, null));
@@ -461,7 +457,7 @@ public class F0CrBridge {
 		return Integer.toString(a);
 	}
 	
-	public ArrayList<Node> convertInst(F0xC fox, int instIndex, Instruction instRaw, ContextFunction context, HashMap<String, String> replaceMap) {
+	public ArrayList<Node> convertInst(F0xC fox, int instIndex, Instruction instRaw, ContextFunction context, HashMap<String, String> replaceMap, LocalVariableTableAttribute locals) {
 		ArrayList<Node> list = new ArrayList<Node>();
 		list.add(new NodeLabel(instIndex));
 		if(instRaw instanceof InstConst) {
@@ -481,9 +477,19 @@ public class F0CrBridge {
 				list.add(new NodeStack(value, NodeStack.PUSH_0));
 			}
 			if(inst.isStore()) {
-				if(value == Node.ADDR && inst.getVariable() >= context.getParameters().size()) {
-					list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable())));	
-					list.add(new NodeObject(NodeObject.FREE, null));
+				if(inst.getVariable() >= context.getParameters().size()) {
+					boolean freeIt = false;
+					//fix for the condition of a variable not being an object before
+					for(LocalVariableInfo info:locals.getTable()) {
+						if(inst.getVariable() != info.getIndex()) continue;
+						if(instIndex < info.getStart()+info.getLength() && instIndex >= info.getStart() && F0xUtil.convertedType(F0xUtil.convertDescriptor(info.getDesc().charAt(0))) == Node.ADDR) {
+							break;
+						}
+					}
+					if(freeIt) {
+						list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable())));	
+						list.add(new NodeObject(NodeObject.FREE, null));
+					}
 				}
 				list.add(new NodeStack(value, NodeStack.POP_0));
 				

@@ -52,6 +52,7 @@ public class x86ModuleObject extends F0xModule {
 		event.getCurrentList().add("mov reg1, [regS+addrsize]");
 		event.getCurrentList().add("mov reg2, [reg1+"+ContextClass.arrayLength(event.getF0xC().getParser().getAddressSize())+"]");
 		event.getCurrentList().add("lea reg0, [reg1+"+ContextClass.arrayOffset(event.getF0xC().getParser().getAddressSize())+"]");
+		event.getCurrentList().add("jmp function_aarray_<destroy>_check");
 		event.getCurrentList().add("function_aarray_<destroy>_next:");
 		event.getCurrentList().add("push reg2");
 		event.getCurrentList().add("push reg0");
@@ -62,6 +63,7 @@ public class x86ModuleObject extends F0xModule {
 		event.getCurrentList().add("pop reg2");
 		event.getCurrentList().add("dec reg2");
 		event.getCurrentList().add("add reg0, addrsize");
+		event.getCurrentList().add("function_aarray_<destroy>_check:");
 		event.getCurrentList().add("test reg2, reg2");
 		event.getCurrentList().add("jne function_aarray_<destroy>_next");
 		event.getCurrentList().add("ret");

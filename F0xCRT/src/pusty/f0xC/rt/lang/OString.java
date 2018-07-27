@@ -423,6 +423,13 @@ public class OString implements OCharSequence {
                 && regionMatches(true, 0, anotherString, 0, value.length);
     }
     
+    public boolean equals(OString anotherString) {
+        return (this == anotherString) ? true
+                : (anotherString != null)
+                && (anotherString.value.length == value.length)
+                && regionMatches(false, 0, anotherString, 0, value.length);
+    }
+    
     public OString trim() {
         int len = value.length;
         int st = 0;
@@ -471,6 +478,8 @@ public class OString implements OCharSequence {
 	        	OString last = this.substring(offset);
 	        	if(last.length() > 0)
 	        		l.add(last);
+	        	if(l.size() == 0)
+	        		l.add(new OString());
 	            return (OString[]) l.toArray();
 	        } else
 	        {

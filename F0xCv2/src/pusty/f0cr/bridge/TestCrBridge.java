@@ -17,10 +17,10 @@ import pusty.f0xC.lang.x86.modules.core.x86ModuleObject;
 public class TestCrBridge {
 	public static void main(String[] args) throws Exception {
 		String path = System.getProperty("user.dir")+"/bin/";
-		String mainClass = "kumiho/main/KumihoTestcase";
+		//String mainClass = "kumiho/main/KumihoTestcase";
 		//String mainClass = "example/windows/Debugger";
-	    //String mainClass = "example/internal/Example";
-		//String mainClass = "pusty/f0x86/F0x86";
+	    //String mainClass = "example/string/Example";
+		String mainClass = "pusty/f0x86/F0x86";
 		if(mainClass.contains("Debugger"))
 			F0xC.DEBUG_MODE=false;
 
