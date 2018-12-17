@@ -6,9 +6,13 @@ import java.util.Collections;
 import pusty.f0xdc.pe.ExecutableReader;
 import pusty.f0xdc.pe.IMAGE_SECTION_HEADER;
 
+/**
+ * Class meant for searching memory for specific patterns and code caves.
+ */
 public class SectionSearcher {
 	protected MemorySection[] sections;
 
+	
 	public static final int TYPE_CC = 0x1;
 	public static final int TYPE_00 = 0x2;
 	public static final int TYPE_90 = 0x4;
@@ -29,15 +33,31 @@ public class SectionSearcher {
 	protected int MIN_SIZE;
 	protected int MODE = 0;
 
+	/**
+	 * Create a new searcher with a given minimum size and mode to search in.
+	 * @param min the minum size for the caves to search for
+	 * @param mode the mode used for searching (meaning the allowed opcodes for caves)
+	 */
 	public SectionSearcher(int min, int mode) {
 		MIN_SIZE = min;
 		MODE = mode;
 	}
-
+	
+	
+	/**
+	 * Create a new searcher with a minimum size of 16 and a given mode to operate with.
+	 * @param mode the mode used for searching (meaning the allowed opcodes for caves)
+	 */
 	public SectionSearcher(int mode) {
 		this(16, mode);
 	}
 
+	/**
+	 * Search for caves for the x86 architecture
+	 * @param reader the ExecutableReader containing the binary
+	 * @param sections the sections to iterate through
+	 * @return an ArrayList containing all the criteria matching MemorySection's
+	 */
 	private ArrayList<MemorySection> searchIntel(ExecutableReader reader, IMAGE_SECTION_HEADER[] sections) {
 		ArrayList<MemorySection> secList = new ArrayList<MemorySection>();
 		try {
@@ -98,12 +118,15 @@ public class SectionSearcher {
 		return secList;
 	}
 
+	/**
+	 * Search the memory of the ExecutableReader for code caves fitting it and return the total resulting size of all caves
+	 * @param reader the ExecutableReader containing the binary to search
+	 * @return the total size of all matching code caves
+	 */
 	public int search(ExecutableReader reader) {
 		ArrayList<MemorySection> secList = null;
 		
 		secList = searchIntel(reader, reader.getSectionHeader());
-		
-
 		
 		Collections.reverse(secList); // Reverse so it's low address to high
 										// address
@@ -115,6 +138,10 @@ public class SectionSearcher {
 
 	}
 
+	/**
+	 * Returns the biggest code cave matching the mode
+	 * @return a MemorySection object of the biggest match
+	 */
 	public MemorySection getBiggest() {
 		int ts = 0;
 		int ms = 0;
@@ -129,6 +156,10 @@ public class SectionSearcher {
 		return sections[bi];
 	}
 
+	/**
+	 * Return an array containing all matching sections
+	 * @return an array which contains all matching sections after a search
+	 */
 	public MemorySection[] getResults() {
 		return sections;
 	}
