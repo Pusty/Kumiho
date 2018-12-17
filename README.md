@@ -6,9 +6,12 @@ The Project consists out of the following libraries:
 
 - F0xCv2 - The main cross compiler project
 - F0xCRT - Runtime for F0xCv2 binaries (contains modified Java Runtime functionality and Windows low level wrapper)
-- F0Cr   - A Java Class reader and parser library
+- F0xCRT32 - x86 32bit specific code of the Runtime
+- F0xCRT64 - x86 64bit specific code of the Runtime
+- F0xExample - General test cases and examples (containg Kumiho)
+- F0Cr   - A Java Class File reader and parser library
 - F0xDc  - A Windows Executable Reader, Parser and Writer
-- F0x86  - A basic x86 32bit and 64bit assembler
+- F0x86  - A basic x86 32bit and 64bit assembler and disassembler
 
 ## TODO List:
 
@@ -32,21 +35,16 @@ The Project consists out of the following libraries:
 - GUI/CLI for choosing build options
 
 ### F0xCv2
-- Increasing modularity
-- A better setup for test cases
 - Changing from FASM to F0x86 as an assembler engine when ready
-- Add 64bit support
 - Documentation
 
 ### F0xCRT
-- Make low level wrapper functions not depend on 32bit address size
-- Include libc wrapper and helper functions here
 - Test all functions
+- Add support for more niche functions and default libraries
 - Change code base for the java runtime to openjdk code for licence reasons
 - Documentation
 
 ### F0Cr
-- Upgrade to latest version (current version doesn't run)
 - Documentation
 
 ### F0xDc
@@ -55,8 +53,8 @@ The Project consists out of the following libraries:
 - Documentation
 
 ### F0x86
-- Add floating point operation
 - Separate 32bit and 64bit assembling
+- Speed even more up
 - Integrate F0xDc for Windows Executable Output
 - General testing
 - Documentation
