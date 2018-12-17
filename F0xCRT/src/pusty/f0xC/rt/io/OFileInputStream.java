@@ -3,8 +3,8 @@ package pusty.f0xC.rt.io;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import pusty.f0xC.imports.libc.CStdio;
 import pusty.f0xC.lang.OverrideHandler.OverrideTranslation;
+import pusty.f0xC.libc.CStdio;
 
 @OverrideTranslation(override = "java/io/FileInputStream")
 public class OFileInputStream extends OInputStream {
@@ -36,6 +36,7 @@ public class OFileInputStream extends OInputStream {
     
     private void open(String name) throws FileNotFoundException {
     	fd.fd = CStdio.fopen(name, "rb");
+    	if(!fd.fd.valid()) throw new FileNotFoundException(name);
     }
 
 	  
@@ -51,7 +52,7 @@ public class OFileInputStream extends OInputStream {
     
     private int readBytes(byte b[], int off, int len) throws IOException {
     	if(b.length < len) throw new IOException("Array too small");
-    	CStdio.fsetpos(fd.fd, off);
+    	CStdio.fsetpos(fd.fd, (long)off);
     	if(len > available()) throw new IOException("Read out of bounds");
     	int amount = CStdio.fread(b, 1, len, fd.fd);
     	CStdio.rewind(fd.fd);
@@ -75,10 +76,10 @@ public class OFileInputStream extends OInputStream {
     }
     
     public int available() throws IOException {
-    	Integer cur = 0;
+    	Long cur = 0L;
     	CStdio.fgetpos(fd.fd, cur);
     	CStdio.fseek(fd.fd, 0, CStdio.SEEK_END);
-    	int size = CStdio.ftell(fd.fd)-cur;
+    	int size = (CStdio.ftell(fd.fd)-cur.intValue());
     	CStdio.fsetpos(fd.fd, cur);
     	return size;
     }

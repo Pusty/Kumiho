@@ -19,12 +19,12 @@ public class InstBranch extends Instruction {
 		type = setType();
 		if(type != BRANCH_SUBROUTINE && type != BRANCH_INVOKE && type != BRANCH_RET && type != BRANCH_RETURN) {
 			if((inst&0xFF) == Opcodes.GOTO_W || (inst&0xFF) == Opcodes.JSR_W) {
-				branchPos = ((int)(((data[0]) << 24) + ((data[1]&0xFF) << 16) + ((data[2]&0xFF) << 8) + (data[3]&0xFF)));
+				branchPos = InstructionHandler.readInt(data, 0);
 			}else {
-				branchPos = ((int)(((data[0]) << 8) + (data[1]&0xFF)));
+				branchPos = InstructionHandler.readShort(data, 0);
 			}
 		}else if(type == BRANCH_INVOKE) {
-			poolIndex = (((data[0]&0xFF) << 8) + (data[1]&0xFF));
+			poolIndex = InstructionHandler.readShort(data, 0);
 		}
 			
 	}

@@ -62,10 +62,10 @@ public class InstConst extends Instruction {
 		else if(inst == Opcodes.FCONST_2) return 2f;
 		else if(inst == Opcodes.LCONST_0) return 0l;
 		else if(inst == Opcodes.LCONST_1) return 1l;
-		else if(inst == Opcodes.BIPUSH) return ((int)((byte)(data[0])));
-		else if(inst == Opcodes.SIPUSH) return ((short)((((int)data[0])&0xFF) << 8) | (((int)data[1])&0xFF));
-		else if(inst == Opcodes.LDC) return pool.get(((int)data[0])&0xFF);
-		else if(inst == Opcodes.LDC2_W || inst == Opcodes.LDC_W) return pool.get((int)((((int)data[0])&0xFF) << 8)|(((int)data[1])&0xFF));
+		else if(inst == Opcodes.BIPUSH) return ((int)((byte)InstructionHandler.readByte(data, 0)));
+		else if(inst == Opcodes.SIPUSH) return ((short)InstructionHandler.readShort(data, 0));
+		else if(inst == Opcodes.LDC) return pool.get(InstructionHandler.readByte(data, 0));
+		else if(inst == Opcodes.LDC2_W || inst == Opcodes.LDC_W) return pool.get(InstructionHandler.readShort(data, 0));
 		return null;
 	}
 	

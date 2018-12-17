@@ -7,9 +7,19 @@ public class OMath {
     public static int min(int a, int b) {
         return (a <= b) ? a : b;
     }
+
     public static long min(long a, long b) {
         return (a <= b) ? a : b;
     }
+    
+    public static double ceil(double a) {
+        if(a > 0) {
+        	return (double)((long)a+1);
+        }else {
+        	return (double)((long)a-1);
+        }
+    }
+    
     /*
     public static float min(float a, float b) {
         if (a != a) return a;   // a is NaN

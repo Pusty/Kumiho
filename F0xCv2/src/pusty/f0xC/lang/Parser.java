@@ -7,33 +7,28 @@ import pusty.f0xC.F0xC;
 import pusty.f0xC.F0xUtil;
 import pusty.f0xC.lang.OverrideHandler.TranslationProperty;
 import pusty.f0xC.module.F0xEvent.F0xEventType;
-import pusty.f0xC.module.event.F0xEventClassParsing;
-import pusty.f0xC.module.event.F0xEventFunctionParsing;
-import pusty.f0xC.module.event.F0xEventNodeCompareParsing;
-import pusty.f0xC.module.event.F0xEventNodeConstParsing;
-import pusty.f0xC.module.event.F0xEventNodeInvokeParsing;
-import pusty.f0xC.module.event.F0xEventNodeJumpParsing;
-import pusty.f0xC.module.event.F0xEventNodeMathParsing;
-import pusty.f0xC.module.event.F0xEventNodeObjectParsing;
-import pusty.f0xC.module.event.F0xEventNodeParsing;
-import pusty.f0xC.module.event.F0xEventNodeStackParsing;
-import pusty.f0xC.module.event.F0xEventNodeVarFixParsing;
-import pusty.f0xC.module.event.F0xEventParsing;
-import pusty.f0xC.nodes.Node;
-import pusty.f0xC.nodes.NodeCompare;
-import pusty.f0xC.nodes.NodeConst;
-import pusty.f0xC.nodes.NodeCustom;
-import pusty.f0xC.nodes.NodeInvoke;
-import pusty.f0xC.nodes.NodeJump;
-import pusty.f0xC.nodes.NodeLabel;
-import pusty.f0xC.nodes.NodeMath;
-import pusty.f0xC.nodes.NodeObject;
-import pusty.f0xC.nodes.NodeStack;
-import pusty.f0xC.nodes.NodeVarFix;
+import pusty.f0xC.module.event.*;
+import pusty.f0xC.nodes.*;
 
 public abstract class Parser {
 	protected OverrideHandler overrideHandler;
 	public abstract String getLanguageName();
+	
+	public Parser() {
+		this(null);
+	}
+	
+	public Parser(Class<?>[] clist) {
+		overrideHandler = new OverrideHandler();
+		if(clist != null)
+			registerOverrides(clist);
+	}
+	
+	public void registerOverrides(Class<?>[] clist) {
+		for(int i=0;i<clist.length;i++)
+			overrideHandler.registerOverride(clist[i]);
+	}
+	
 	public void simplify(F0xC fox) {}
 	
 	public String dumpByte(int i) {

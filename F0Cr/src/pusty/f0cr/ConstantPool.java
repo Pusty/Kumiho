@@ -54,7 +54,7 @@ public class ConstantPool {
 			else if(tag == METHOD_TYPE)
 				poolContent[i+1] = new MethodType(poolContent, s.readShort());
 			else if(tag == INVOKE_DYNAMIC)
-				poolContent[i+1] = new InvokeDynamic(poolContent, s.readInt());
+				poolContent[i+1] = new InvokeDynamic(poolContent, s.readShort(), s.readShort());
 			else {
 				throw new Exception("Can't handle tag "+tag);
 			}

@@ -41,7 +41,8 @@ public class InstructionReader {
 				byte[] data = new byte[8];
 				for(int i=0;i<data.length;i++)
 					data[i] = d.readByte();
-				int amount = ((data[4]&0xFF) << 24) + ((data[5]&0xFF) << 16) + ((data[6]&0xFF) << 8) + (data[7]&0xFF);
+				int amount = InstructionHandler.readInt(data, 4);
+				///((data[4]&0xFF) << 24) + ((data[5]&0xFF) << 16) + ((data[6]&0xFF) << 8) + (data[7]&0xFF);
 				byte[] realData = new byte[8+amount*8];
 				for(int i=0;i<4;i++) //Default Branch
 					realData[0+i] = data[i];
@@ -49,7 +50,7 @@ public class InstructionReader {
 					realData[4+i] = data[4+i];		
 				for(int i=0;i<amount*8;i++)
 					realData[8+i]=d.readByte();
-				instructionHash.put(indexOfInst, new Instruction(this, b, realData));
+				instructionHash.put(indexOfInst, InstructionHandler.createInstruction(this, b, realData));
 			}else if(v == Opcodes.TABLESWITCH) {
 				//Padding
 				if((indexOfInst+1)%4 != 0)
@@ -59,8 +60,10 @@ public class InstructionReader {
 				for(int i=0;i<data.length;i++)
 					data[i] = d.readByte();
 			
-				int start = (((data[4]&0xFF) << 24) | ((data[5]&0xFF) << 16) | ((data[6]&0xFF) << 8) | (data[7]&0xFF));
-				int end = (((data[8]&0xFF) << 24) | ((data[9]&0xFF) << 16) | ((data[10]&0xFF) << 8) | (data[11]&0xFF));
+				int start = InstructionHandler.readInt(data, 4);
+				//(((data[4]&0xFF) << 24) | ((data[5]&0xFF) << 16) | ((data[6]&0xFF) << 8) | (data[7]&0xFF));
+				int end   = InstructionHandler.readInt(data, 8);
+				//(((data[8]&0xFF) << 24) | ((data[9]&0xFF) << 16) | ((data[10]&0xFF) << 8) | (data[11]&0xFF));
 				byte[] realData = new byte[12+(end-start+1)*4];
 				for(int i=0;i<4;i++) //Default Branch
 					realData[0+i] = data[i];
@@ -70,16 +73,23 @@ public class InstructionReader {
 					realData[8+i] = data[8+i];			
 				for(int i=0;i<(end-start+1)*4;i++)
 					realData[12+i]=d.readByte();
-				instructionHash.put(indexOfInst, new Instruction(this, b, realData));
+				instructionHash.put(indexOfInst, InstructionHandler.createInstruction(this, b, realData));
 			}else if(v == Opcodes.WIDE) {
 				
 				byte inst = d.readByte();
+				System.err.println("WIDE isn't properly implemented yet");
 				if(inst  == Opcodes.IINC) {
 					byte[] data = new byte[5];
-					instructionHash.put(indexOfInst, new Instruction(this, b, data));
+					data[0] = d.readByte();
+					for(int i=0;i<4;i++)
+						data[1+i] = d.readByte();
+					instructionHash.put(indexOfInst, InstructionHandler.createInstruction(this, b, data));
 				}else {
 					byte[] data = new byte[3];
-					instructionHash.put(indexOfInst, new Instruction(this, b, data));
+					data[0] = d.readByte();
+					for(int i=0;i<3;i++)
+						data[1+i] = d.readByte();
+					instructionHash.put(indexOfInst, InstructionHandler.createInstruction(this, b, data));
 				}
 			}else {
 				int dataSize = Opcodes.getSize(b);

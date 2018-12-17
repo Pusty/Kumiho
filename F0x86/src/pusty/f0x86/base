@@ -502,12 +502,32 @@ RW 99      ;CWD DX, AX
 RW 99      ;CWD
    99      ;CWQ EDX, EAX
    99      ;CWQ
+   99      ;CDQ EDX, EAX
+   99      ;CDQ
 RQ 99      ;CQO RDX, RAX
 RQ 99      ;CQO
-
-#TODO CALLF? [9A]
-#TODO FWAIT, WAIT [9B]
-#TODO [9C,9D,9E,9F,A0,A1,A2,A3]
+   9A      ;CALLF id
+#   9B      ;WAIT
+#   9B      ;FWAIT
+   9C      ;PUSHF
+   9C      ;PUSHFD
+   9C      ;PUSHFQ
+   9D      ;POPF
+   9D      ;POPFD
+   9D      ;POPFQ
+   9E      ;SAHF
+   9E      ;SAHF AH
+   9F      ;LAHF
+   9F      ;LAHF AH
+#official instruction name is MOV, but I don't have a sepperate case for relative addressing to RMOV instead
+RQ A0      ;RMOV AL, ib
+   A0      ;RMOV AL, ib
+   A1      ;RMOV EAX, iw
+RQ A1      ;RMOV RAX, iq  
+   A2      ;RMOV ib, AL
+RQ A2      ;RMOV ib, AL
+   A3      ;RMOV id, EAX
+RQ A3      ;RMOV iq, RAX
 
 
    A4      ;MOVSB
@@ -763,9 +783,453 @@ RQ D3 /7   ;SAR rmq, CL
    D6      ;SETALC
    D7      ;XLAT
    D7      ;XLATB
-   
-#TODO [D8,D9,DA,DB,DC,DD,DE,DF] floating point instructions
 
+#FLOATING POINT INSTRUCTIONS:
+   D8 /0   ;FADD md
+   D8 /1   ;FMUL md
+   D8 /2   ;FCOM md
+   D8 /3   ;FCOMP md
+   D8 /4   ;FSUB md
+   D8 /5   ;FSUBR md
+   D8 /6   ;FDIV md
+   D8 /7   ;FDIVR md 
+   D9 /0   ;FLD md
+   D9 /2   ;FST md
+   D9 /3   ;FSTP md
+#actuall it writes 14/28 bytes but whatever
+   D9 /4   ;FLDENV md
+   D9 /5   ;FLDCW mw
+#actuall it writes 14/28 bytes but whatever
+   D9 /6   ;FNSTENV md
+   9B D9 /6;FNSTENV md
+   D9 /7   ;FNSTCW  md
+   9B D9 /7;FSTCW   md  
+   DA /0   ;FIADD md
+   DA /1   ;FIMUL md
+   DA /2   ;FICOM md
+   DA /3   ;FICOMP md
+   DA /4   ;FISUB md
+   DA /5   ;FISUBR md
+   DA /6   ;FIDIV md
+   DA /7   ;FIDIVR md  
+   DB /0   ;FILD md
+   DB /1   ;FISTTP md
+   DB /2   ;FIST md
+   DB /3   ;FISTP md
+#   DB /5   ;FLD me
+#   DB /7   ;FSTP me 
+   DC /0   ;FADD mq
+   DC /1   ;FMUL mq
+   DC /2   ;FCOM mq
+   DC /3   ;FCOMP mq
+   DC /4   ;FSUB mq
+   DC /5   ;FSUBR mq
+   DC /6   ;FDIV mq
+   DC /7   ;FDIVR mq
+   DD /0   ;FLD mq
+   DD /1   ;FISTTP mq
+   DD /2   ;FST mq
+   DD /3   ;FSTP mq
+   DD /7   ;FNSTSW mw
+   9B DD /7;FSTSW  mw
+   DE /0   ;FIADD mw
+   DE /1   ;FIMUL mw
+   DE /2   ;FICOM mw
+   DE /3   ;FICOMP mw
+   DE /4   ;FISUB mw
+   DE /5   ;FISUBR mw
+   DE /6   ;FIDIV mw
+   DE /7   ;FIDIVR mw
+   DF /0   ;FILD mw
+   DF /1   ;FISTTP mw
+   DF /2   ;FIST mw
+   DF /3   ;FISTP mw
+#   DF /4   ;FBLD me
+   DF /5   ;FILD mq
+#   DF /6   ;FBSTP me
+   DF /7   ;FISTP mq
+
+#   D8 C0+i ;FASS ST0, STi
+#   D8 C8+i ;FMUL ST0, STi
+#   D8 D0+i ;FCOM STi
+#   D8 D8+i ;FCOMP STi
+#   D8 E0+i ;FSUB ST0, STi
+#   D8 E8+i ;FSUBR ST0, STi
+#   D8 F0+i ;FDIV ST0, STi
+#   D8 F8+i ;FDIVR ST0, STi
+#   D9 C0+i ;FLD STi
+#   D9 C8+i ;FXCH STi
+#   DA C0+i ;FCMOVB   ST0, STi
+#   DA C8+i ;FCMOVE   ST0, STi
+#   DA D0+i ;FCMOVBE  ST0, STi
+#   DA D8+i ;FCMOVU   ST0, STi
+#   DB C0+i ;FCMOVNB  ST0, STi
+#   DB C8+i ;FCMOVNE  ST0, STi
+#   DB D0+i ;FCMOVNBE ST0, STi
+#   DB D8+i ;FCMOVNU  ST0, STi
+#   DB E8+i ;FUCOMI   ST0, STi
+#   DB F0+i ;FCOMI    ST0, STi
+#   DC C0+i ;FADD STi, ST0
+#   DC C8+i ;FMUL STi, ST0
+#   DC E0+i ;FSUBR STi, ST0
+#   DC E8+i ;FSUB STi, ST0
+#   DC F0+i ;FDIVR STi, ST0
+#   DC F8+i ;FDIV STi, ST0
+#   DD C0+i ;FFREE STi
+#   DD D0+i ;FST STi
+#   DD D8+i ;FSTP STi
+#   DE C0+i ;FADDP STi, ST0
+#   DE C8+i ;FMULP STi, ST0
+#   DE E0+i ;FSUBRP STi, ST0
+#   DE E8+i ;FSUBP STi, ST0
+#   DE F0+i ;FDIVRP STi, ST0
+#   DE F8+i ;FDIVP STi, ST0
+#   DF E8+i ;FUCOMIP ST0, STi
+#   DF F0+i ;FCOMIP  ST0, STi
+
+   D8 C0 ;FASS ST0, ST0
+   D8 C1 ;FASS ST0, ST1
+   D8 C2 ;FASS ST0, ST2
+   D8 C3 ;FASS ST0, ST3
+   D8 C4 ;FASS ST0, ST4
+   D8 C5 ;FASS ST0, ST5
+   D8 C6 ;FASS ST0, ST6
+   D8 C7 ;FASS ST0, ST7
+   D8 C8 ;FMUL ST0, ST0
+   D8 C9 ;FMUL ST0, ST1
+   D8 CA ;FMUL ST0, ST2
+   D8 CB ;FMUL ST0, ST3
+   D8 CC ;FMUL ST0, ST4
+   D8 CD ;FMUL ST0, ST5
+   D8 CE ;FMUL ST0, ST6
+   D8 CF ;FMUL ST0, ST7
+   D8 D0 ;FCOM ST0
+   D8 D1 ;FCOM ST1
+   D8 D2 ;FCOM ST2
+   D8 D3 ;FCOM ST3
+   D8 D4 ;FCOM ST4
+   D8 D5 ;FCOM ST5
+   D8 D6 ;FCOM ST6
+   D8 D7 ;FCOM ST7
+   D8 D8 ;FCOMP ST0
+   D8 D9 ;FCOMP ST1
+   D8 DA ;FCOMP ST2
+   D8 DB ;FCOMP ST3
+   D8 DC ;FCOMP ST4
+   D8 DD ;FCOMP ST5
+   D8 DE ;FCOMP ST6
+   D8 DF ;FCOMP ST7
+   D8 E0 ;FSUB ST0, ST0
+   D8 E1 ;FSUB ST0, ST1
+   D8 E2 ;FSUB ST0, ST2
+   D8 E3 ;FSUB ST0, ST3
+   D8 E4 ;FSUB ST0, ST4
+   D8 E5 ;FSUB ST0, ST5
+   D8 E6 ;FSUB ST0, ST6
+   D8 E7 ;FSUB ST0, ST7
+   D8 E8 ;FSUBR ST0, ST0
+   D8 E9 ;FSUBR ST0, ST1
+   D8 EA ;FSUBR ST0, ST2
+   D8 EB ;FSUBR ST0, ST3
+   D8 EC ;FSUBR ST0, ST4
+   D8 ED ;FSUBR ST0, ST5
+   D8 EE ;FSUBR ST0, ST6
+   D8 EF ;FSUBR ST0, ST7
+   D8 F0 ;FDIV ST0, ST0
+   D8 F1 ;FDIV ST0, ST1
+   D8 F2 ;FDIV ST0, ST2
+   D8 F3 ;FDIV ST0, ST3
+   D8 F4 ;FDIV ST0, ST4
+   D8 F5 ;FDIV ST0, ST5
+   D8 F6 ;FDIV ST0, ST6
+   D8 F7 ;FDIV ST0, ST7
+   D8 F8 ;FDIVR ST0, ST0
+   D8 F9 ;FDIVR ST0, ST1
+   D8 FA ;FDIVR ST0, ST2
+   D8 FB ;FDIVR ST0, ST3
+   D8 FC ;FDIVR ST0, ST4
+   D8 FD ;FDIVR ST0, ST5
+   D8 FE ;FDIVR ST0, ST6
+   D8 FF ;FDIVR ST0, ST7
+   D9 C0 ;FLD ST0
+   D9 C1 ;FLD ST1
+   D9 C2 ;FLD ST2
+   D9 C3 ;FLD ST3
+   D9 C4 ;FLD ST4
+   D9 C5 ;FLD ST5
+   D9 C6 ;FLD ST6
+   D9 C7 ;FLD ST7
+   D9 C8 ;FXCH ST0
+   D9 C9 ;FXCH ST1
+   D9 CA ;FXCH ST2
+   D9 CB ;FXCH ST3
+   D9 CC ;FXCH ST4
+   D9 CD ;FXCH ST5
+   D9 CE ;FXCH ST6
+   D9 CF ;FXCH ST7
+   DA C0 ;FCMOVB   ST0, ST0
+   DA C1 ;FCMOVB   ST0, ST1
+   DA C2 ;FCMOVB   ST0, ST2
+   DA C3 ;FCMOVB   ST0, ST3
+   DA C4 ;FCMOVB   ST0, ST4
+   DA C5 ;FCMOVB   ST0, ST5
+   DA C6 ;FCMOVB   ST0, ST6
+   DA C7 ;FCMOVB   ST0, ST7
+   DA C8 ;FCMOVE   ST0, ST0
+   DA C9 ;FCMOVE   ST0, ST1
+   DA CA ;FCMOVE   ST0, ST2
+   DA CB ;FCMOVE   ST0, ST3
+   DA CC ;FCMOVE   ST0, ST4
+   DA CD ;FCMOVE   ST0, ST5
+   DA CE ;FCMOVE   ST0, ST6
+   DA CF ;FCMOVE   ST0, ST7
+   DA D0 ;FCMOVBE  ST0, ST0
+   DA D1 ;FCMOVBE  ST0, ST1
+   DA D2 ;FCMOVBE  ST0, ST2
+   DA D3 ;FCMOVBE  ST0, ST3
+   DA D4 ;FCMOVBE  ST0, ST4
+   DA D5 ;FCMOVBE  ST0, ST5
+   DA D6 ;FCMOVBE  ST0, ST6
+   DA D7 ;FCMOVBE  ST0, ST7
+   DA D8 ;FCMOVU   ST0, ST0
+   DA D9 ;FCMOVU   ST0, ST1
+   DA DA ;FCMOVU   ST0, ST2
+   DA DB ;FCMOVU   ST0, ST3
+   DA DC ;FCMOVU   ST0, ST4
+   DA DD ;FCMOVU   ST0, ST5
+   DA DE ;FCMOVU   ST0, ST6
+   DA DF ;FCMOVU   ST0, ST7
+   DB C0 ;FCMOVNB  ST0, ST0
+   DB C1 ;FCMOVNB  ST0, ST1
+   DB C2 ;FCMOVNB  ST0, ST2
+   DB C3 ;FCMOVNB  ST0, ST3
+   DB C4 ;FCMOVNB  ST0, ST4
+   DB C5 ;FCMOVNB  ST0, ST5
+   DB C6 ;FCMOVNB  ST0, ST6
+   DB C7 ;FCMOVNB  ST0, ST7
+   DB C8 ;FCMOVNE  ST0, ST0
+   DB C9 ;FCMOVNE  ST0, ST1
+   DB CA ;FCMOVNE  ST0, ST2
+   DB CB ;FCMOVNE  ST0, ST3
+   DB CC ;FCMOVNE  ST0, ST4
+   DB CD ;FCMOVNE  ST0, ST5
+   DB CE ;FCMOVNE  ST0, ST6
+   DB CF ;FCMOVNE  ST0, ST7
+   DB D0 ;FCMOVNBE ST0, ST0
+   DB D1 ;FCMOVNBE ST0, ST1
+   DB D2 ;FCMOVNBE ST0, ST2
+   DB D3 ;FCMOVNBE ST0, ST3
+   DB D4 ;FCMOVNBE ST0, ST4
+   DB D5 ;FCMOVNBE ST0, ST5
+   DB D6 ;FCMOVNBE ST0, ST6
+   DB D7 ;FCMOVNBE ST0, ST7
+   DB D8 ;FCMOVNU  ST0, ST0
+   DB D9 ;FCMOVNU  ST0, ST1
+   DB DA ;FCMOVNU  ST0, ST2
+   DB DB ;FCMOVNU  ST0, ST3
+   DB DC ;FCMOVNU  ST0, ST4
+   DB DD ;FCMOVNU  ST0, ST5
+   DB DE ;FCMOVNU  ST0, ST6
+   DB DF ;FCMOVNU  ST0, ST7
+   DB E8 ;FUCOMI   ST0, ST0
+   DB E9 ;FUCOMI   ST0, ST1
+   DB EA ;FUCOMI   ST0, ST2
+   DB EB ;FUCOMI   ST0, ST3
+   DB EC ;FUCOMI   ST0, ST4
+   DB ED ;FUCOMI   ST0, ST5
+   DB EE ;FUCOMI   ST0, ST6
+   DB EF ;FUCOMI   ST0, ST7
+   DB F0 ;FCOMI    ST0, ST0
+   DB F1 ;FCOMI    ST0, ST1
+   DB F2 ;FCOMI    ST0, ST2
+   DB F3 ;FCOMI    ST0, ST3
+   DB F4 ;FCOMI    ST0, ST4
+   DB F5 ;FCOMI    ST0, ST5
+   DB F6 ;FCOMI    ST0, ST6
+   DB F7 ;FCOMI    ST0, ST7
+   DC C0 ;FADD ST0, ST0
+   DC C1 ;FADD ST1, ST0
+   DC C2 ;FADD ST2, ST0
+   DC C3 ;FADD ST3, ST0
+   DC C4 ;FADD ST4, ST0
+   DC C5 ;FADD ST5, ST0
+   DC C6 ;FADD ST6, ST0
+   DC C7 ;FADD ST7, ST0
+   DC C8 ;FMUL ST0, ST0
+   DC C9 ;FMUL ST1, ST0
+   DC CA ;FMUL ST2, ST0
+   DC CB ;FMUL ST3, ST0
+   DC CC ;FMUL ST4, ST0
+   DC CD ;FMUL ST5, ST0
+   DC CE ;FMUL ST6, ST0
+   DC CF ;FMUL ST7, ST0
+   DC E0 ;FSUBR ST0, ST0
+   DC E1 ;FSUBR ST1, ST0
+   DC E2 ;FSUBR ST2, ST0
+   DC E3 ;FSUBR ST3, ST0
+   DC E4 ;FSUBR ST4, ST0
+   DC E5 ;FSUBR ST5, ST0
+   DC E6 ;FSUBR ST6, ST0
+   DC E7 ;FSUBR ST7, ST0
+   DC E8 ;FSUB ST0, ST0
+   DC E9 ;FSUB ST1, ST0
+   DC EA ;FSUB ST2, ST0
+   DC EB ;FSUB ST3, ST0
+   DC EC ;FSUB ST4, ST0
+   DC ED ;FSUB ST5, ST0
+   DC EE ;FSUB ST6, ST0
+   DC EF ;FSUB ST7, ST0
+   DC F0 ;FDIVR ST0, ST0
+   DC F1 ;FDIVR ST1, ST0
+   DC F2 ;FDIVR ST2, ST0
+   DC F3 ;FDIVR ST3, ST0
+   DC F4 ;FDIVR ST4, ST0
+   DC F5 ;FDIVR ST5, ST0
+   DC F6 ;FDIVR ST6, ST0
+   DC F7 ;FDIVR ST7, ST0
+   DC F8 ;FDIV ST0, ST0
+   DC F9 ;FDIV ST1, ST0
+   DC FA ;FDIV ST2, ST0
+   DC FB ;FDIV ST3, ST0
+   DC FC ;FDIV ST4, ST0
+   DC FD ;FDIV ST5, ST0
+   DC FE ;FDIV ST6, ST0
+   DC FF ;FDIV ST7, ST0
+   DD C0 ;FFREE ST0
+   DD C1 ;FFREE ST1
+   DD C2 ;FFREE ST2
+   DD C3 ;FFREE ST3
+   DD C4 ;FFREE ST4
+   DD C5 ;FFREE ST5
+   DD C6 ;FFREE ST6
+   DD C7 ;FFREE ST7
+   DD D0 ;FST ST0
+   DD D1 ;FST ST1
+   DD D2 ;FST ST2
+   DD D3 ;FST ST3
+   DD D4 ;FST ST4
+   DD D5 ;FST ST5
+   DD D6 ;FST ST6
+   DD D7 ;FST ST7
+   DD D8 ;FSTP ST0
+   DD D9 ;FSTP ST1
+   DD DA ;FSTP ST2
+   DD DB ;FSTP ST3
+   DD DC ;FSTP ST4
+   DD DD ;FSTP ST5
+   DD DE ;FSTP ST6
+   DD DF ;FSTP ST7
+   DE C0 ;FADDP ST0, ST0
+   DE C1 ;FADDP ST1, ST0
+   DE C2 ;FADDP ST2, ST0
+   DE C3 ;FADDP ST3, ST0
+   DE C4 ;FADDP ST4, ST0
+   DE C5 ;FADDP ST5, ST0
+   DE C6 ;FADDP ST6, ST0
+   DE C7 ;FADDP ST7, ST0
+   DE C8 ;FMULP ST0, ST0
+   DE C9 ;FMULP ST1, ST0
+   DE CA ;FMULP ST2, ST0
+   DE CB ;FMULP ST3, ST0
+   DE CC ;FMULP ST4, ST0
+   DE CD ;FMULP ST5, ST0
+   DE CE ;FMULP ST6, ST0
+   DE CF ;FMULP ST7, ST0
+   DE E0 ;FSUBRP ST0, ST0
+   DE E1 ;FSUBRP ST1, ST0
+   DE E2 ;FSUBRP ST2, ST0
+   DE E3 ;FSUBRP ST3, ST0
+   DE E4 ;FSUBRP ST4, ST0
+   DE E5 ;FSUBRP ST5, ST0
+   DE E6 ;FSUBRP ST6, ST0
+   DE E7 ;FSUBRP ST7, ST0
+   DE E8 ;FSUBP ST0, ST0
+   DE E9 ;FSUBP ST1, ST0
+   DE EA ;FSUBP ST2, ST0
+   DE EB ;FSUBP ST3, ST0
+   DE EC ;FSUBP ST4, ST0
+   DE ED ;FSUBP ST5, ST0
+   DE EE ;FSUBP ST6, ST0
+   DE EF ;FSUBP ST7, ST0
+   DE F0 ;FDIVRP ST0, ST0
+   DE F1 ;FDIVRP ST1, ST0
+   DE F2 ;FDIVRP ST2, ST0
+   DE F3 ;FDIVRP ST3, ST0
+   DE F4 ;FDIVRP ST4, ST0
+   DE F5 ;FDIVRP ST5, ST0
+   DE F6 ;FDIVRP ST6, ST0
+   DE F7 ;FDIVRP ST7, ST0
+   DE F8 ;FDIVP ST0, ST0
+   DE F9 ;FDIVP ST1, ST0
+   DE FA ;FDIVP ST2, ST0
+   DE FB ;FDIVP ST3, ST0
+   DE FC ;FDIVP ST4, ST0
+   DE FD ;FDIVP ST5, ST0
+   DE FE ;FDIVP ST6, ST0
+   DE FF ;FDIVP ST7, ST0
+   DF E8 ;FUCOMIP ST0, ST0
+   DF E9 ;FUCOMIP ST0, ST1
+   DF EA ;FUCOMIP ST0, ST2
+   DF EB ;FUCOMIP ST0, ST3
+   DF EC ;FUCOMIP ST0, ST4
+   DF ED ;FUCOMIP ST0, ST5
+   DF EE ;FUCOMIP ST0, ST6
+   DF EF ;FUCOMIP ST0, ST7
+   DF F0 ;FCOMIP  ST0, ST0
+   DF F1 ;FCOMIP  ST0, ST1
+   DF F2 ;FCOMIP  ST0, ST2
+   DF F3 ;FCOMIP  ST0, ST3
+   DF F4 ;FCOMIP  ST0, ST4
+   DF F5 ;FCOMIP  ST0, ST5
+   DF F6 ;FCOMIP  ST0, ST6
+   DF F7 ;FCOMIP  ST0, ST7
+   
+   D8 D1   ;FCOM
+   D8 D9   ;FCOMP
+   D9 C9   ;FXCH
+   D9 D0   ;FNOP
+   D9 E0   ;FCHS
+   D9 E1   ;FABS
+   D9 E4   ;FTST
+   D9 E5   ;FXAM
+   D9 E8   ;FKD1
+   D9 E9   ;FLDL2T
+   D9 EA   ;FLDL2E
+   D9 EB   ;FLDPI
+   D9 EC   ;FLDLG2
+   D9 ED   ;FLDLN2
+   D9 EE   ;FLDZ
+   D9 F0   ;F2XM1
+   D9 F1   ;FYL2X
+   D9 F2   ;FPTAN
+   D9 F3   ;FPATAN
+   D9 F4   ;FXTRACT
+   D9 F5   ;FPREM1
+   D9 F6   ;FDECSTP
+   D9 F7   ;FINCSTP
+   D9 F8   ;FPREM
+   D9 F9   ;FYL2XP1
+   D9 FA   ;FSQRT
+   D9 FB   ;FSINCOS
+   D9 FC   ;FRNDINT
+   D9 FD   ;FSCALE
+   D9 FE   ;FSIN
+   D9 FF   ;FCOS 
+   DB E2    ;FNCLEX
+   9B DB E2 ;FCLEX
+   DB E3    ;FNINIT
+   9B DB E3 ;FINIT
+   DE C1   ;FADDP
+   DE C9   ;FMULP
+   DE D9   ;FCOMPP
+   DE E1   ;FSUBRP
+   DE E9   ;FSUBP
+   DE F1   ;FDIVRP
+   DE F9   ;FDIVP
+   DF E0   ;FNSTSW AX
+   9B DF E0;FSTSW  AX
+#  END FLOATING POINT INSTRUCTIONS
+   
    E0 ib   ;LOOPNZ ib
    E0 ib   ;LOOPNE ib
    E1 ib   ;LOOPZ  ib
@@ -790,10 +1254,11 @@ RQ E7 ib   ;OUT ib, RAX
 #TODO Reminder: the word call isn't relative like the others [which is why it's disabled]
 #RW E8 iw   ;CALL iw
    E8 id   ;CALL id
-RW E9 iw   ;JMP iw
-   E9 id   ;JMP id
 #TODO ADD JMPF [EA]
    EB ib   ;JMP ib
+   
+#RW E9 iw   ;JMP iw
+   E9 id   ;JMP id
 
    EC      ;IN AL, DX
    EC      ;IN DX
@@ -818,8 +1283,8 @@ RQ EF      ;OUT DX, RAX
 
    F6 /0 ib;TEST rmb, ib
    F6 /1 ib;TEST rmb, ib
-   F6 /2 ib;NOT  rmb, ib
-   F6 /3 ib;NEG  rmb, ib
+   F6 /2   ;NOT  rmb
+   F6 /3   ;NEG  rmb
    F6 /4   ;MUL  rmb
    F6 /5   ;IMUL rmb
    F6 /6   ;DIV  rmb
@@ -827,8 +1292,8 @@ RQ EF      ;OUT DX, RAX
    
 RW F7 /0 iw;TEST rmw, iw
 RW F7 /1 iw;TEST rmw, iw
-RW F7 /2 iw;NOT  rmw, iw
-RW F7 /3 iw;NEG  rmw, iw
+RW F7 /2   ;NOT  rmw
+RW F7 /3   ;NEG  rmw
 RW F7 /4   ;MUL  rmw
 RW F7 /5   ;IMUL rmw
 RW F7 /6   ;DIV  rmw
@@ -836,8 +1301,8 @@ RW F7 /7   ;IDIV rmw
    
    F7 /0 id;TEST rmd, id
    F7 /1 id;TEST rmd, id
-   F7 /2 id;NOT  rmd, id
-   F7 /3 id;NEG  rmd, id
+   F7 /2   ;NOT  rmd
+   F7 /3   ;NEG  rmd
    F7 /4   ;MUL  rmd
    F7 /5   ;IMUL rmd
    F7 /6   ;DIV  rmd
@@ -845,8 +1310,8 @@ RW F7 /7   ;IDIV rmw
    
 RQ F7 /0 iq;TEST rmq, iq
 RQ F7 /1 iq;TEST rmq, iq
-RQ F7 /2 iq;NOT  rmq, iq
-RQ F7 /3 iq;NEG  rmq, iq
+RQ F7 /2   ;NOT  rmq
+RQ F7 /3   ;NEG  rmq
 RQ F7 /4   ;MUL  rmq
 RQ F7 /5   ;IMUL rmq
 RQ F7 /6   ;DIV  rmq
@@ -881,6 +1346,157 @@ RW FF /6   ;PUSH rmw
    FF /6   ;PUSH rmd
 RQ FF /6   ;PUSH rmq
 
+
+#      == MOVSX immediate ==
+
+   0F BE /r ;MOVSX rw, rmb
+   0F BE /r ;MOVSX rd, rmb
+#64bit only
+RQ 0F BE /r ;MOVSX rq, rmb
+   0F BF /r ;MOVSX rd, rmw
+#64bit only
+RQ 0F BF /r ;MOVSX rq, rmw
+
+#      == SETCC immediate ==
+   0F 97    ;SETA   rmb
+   0F 93    ;SETAE  rmb
+   0F 92    ;SETB   rmb
+   0F 96    ;SETBE  rmb
+   0F 92    ;SETC   rmb
+   0F 94    ;SETE   rmb
+   0F 9F    ;SETG   rmb
+   0F 9D    ;SETGE  rmb
+   0F 9C    ;SETL   rmb
+   0F 9E    ;SETLE  rmb
+   0F 96    ;SETNA  rmb
+   0F 92    ;SETNAE rmb
+   0F 93    ;SETNB  rmb
+   0F 97    ;SETNBE rmb
+   0F 93    ;SETNC  rmb
+   0F 95    ;SETNE  rmb
+   0F 9C    ;SETNGE rmb
+   0F 9D    ;SETNL  rmb
+   0F 9F    ;SETNLE rmb
+   0F 91    ;SETNO  rmb
+   0F 9B    ;SETNP  rmb
+   0F 99    ;SETNS  rmb
+   0F 95    ;SETNZ  rmb
+   0F 90    ;SETO   rmb
+   0F 9A    ;SETP   rmb
+   0F 9A    ;SETPE  rmb
+   0F 9B    ;SETPO  rmb
+   0F 98    ;SETS   rmb
+   0F 94    ;SETZ   rmb
+   
+   
+#      == JUMPS 32bit ==
+   0F 80 id   ;JO id
+   0F 81 id   ;JNO id
+   0F 82 id   ;JB id
+   0F 82 id   ;JNAE id
+   0F 82 id   ;JC id
+   0F 83 id   ;JNB id
+   0F 83 id   ;JAE id
+   0F 83 id   ;JNC id 
+   0F 84 id   ;JZ id
+   0F 84 id   ;JE id
+   0F 85 id   ;JNZ id
+   0F 85 id   ;JNE id
+   0F 86 id   ;JBE id
+   0F 86 id   ;JNA id
+   0F 87 id   ;JNBE id
+   0F 87 id   ;JA id
+   0F 88 id   ;JS id
+   0F 89 id   ;JNS id
+   0F 8A id   ;JP id
+   0F 8A id   ;JPE id
+   0F 8B id   ;JNP id
+   0F 8B id   ;JPO id
+   0F 8C id   ;JL id
+   0F 8C id   ;JNGE id
+   0F 8D id   ;JNL id
+   0F 8D id   ;JGE id
+   0F 8E id   ;JLE id
+   0F 8E id   ;JNG id
+   0F 8F id   ;JNLE id
+   0F 8F id   ;JG id
+#      == END OF JUMPS ==
+
+#      == CMOVCC ==
+   0F 40 /r   ;CMOVO rd, rmd
+RQ 0F 40 /r   ;CMOVO rq, rmq
+   0F 41 /r   ;CMOVNO rd, rmd
+RQ 0F 41 /r   ;CMOVNO rq, rmq
+   0F 42 /r   ;CMOVB rd, rmd
+RQ 0F 42 /r   ;CMOVB rq, rmq
+   0F 42 /r   ;CMOVNAE rd, rmd
+RQ 0F 42 /r   ;CMOVNAE rq, rmq
+   0F 42 /r   ;CMOVC rd, rmd
+RQ 0F 42 /r   ;CMOVC rq, rmq
+   0F 43 /r   ;CMOVNB rd, rmd
+RQ 0F 43 /r   ;CMOVNB rq, rmq
+   0F 43 /r   ;CMOVAE rd, rmd
+RQ 0F 43 /r   ;CMOVAE rq, rmq
+   0F 43 /r   ;CMOVNC rd, rmd
+RQ 0F 43 /r   ;CMOVNC rq, rmq
+   0F 44 /r   ;CMOVZ rd, rmd
+RQ 0F 44 /r   ;CMOVZ rq, rmq
+   0F 44 /r   ;CMOVE rd, rmd
+RQ 0F 44 /r   ;CMOVE rq, rmq
+   0F 45 /r   ;CMOVNZ rd, rmd
+RQ 0F 45 /r   ;CMOVNZ rq, rmq
+   0F 45 /r   ;CMOVNE rd, rmd
+RQ 0F 45 /r   ;CMOVNE rq, rmq
+   0F 46 /r   ;CMOVBE rd, rmd
+RQ 0F 46 /r   ;CMOVBE rq, rmq
+   0F 46 /r   ;CMOVNA rd, rmd
+RQ 0F 46 /r   ;CMOVNA rq, rmq
+   0F 47 /r   ;CMOVNBE rd, rmd
+RQ 0F 47 /r   ;CMOVNBE rq, rmq
+   0F 47 /r   ;CMOVA rd, rmd
+RQ 0F 47 /r   ;CMOVA rq, rmq
+   0F 48 /r   ;CMOVS rd, rmd
+RQ 0F 48 /r   ;CMOVS rq, rmq
+   0F 49 /r   ;CMOVNS rd, rmd
+RQ 0F 49 /r   ;CMOVNS rq, rmq
+   0F 4A /r   ;CMOVP rd, rmd
+RQ 0F 4A /r   ;CMOVP rq, rmq
+   0F 4A /r   ;CMOVPE rd, rmd
+RQ 0F 4A /r   ;CMOVPE rq, rmq
+   0F 4B /r   ;CMOVNP rd, rmd
+RQ 0F 4B /r   ;CMOVNP rq, rmq
+   0F 4B /r   ;CMOVPO rd, rmd
+RQ 0F 4B /r   ;CMOVPO rq, rmq
+   0F 4C /r   ;CMOVL rd, rmd
+RQ 0F 4C /r   ;CMOVL rq, rmq
+   0F 4C /r   ;CMOVNGE rd, rmd
+RQ 0F 4C /r   ;CMOVNGE rq, rmq
+   0F 4D /r   ;CMOVNL rd, rmd
+RQ 0F 4D /r   ;CMOVNL rq, rmq
+   0F 4D /r   ;CMOVGE rd, rmd
+RQ 0F 4D /r   ;CMOVGE rq, rmq
+   0F 4E /r   ;CMOVLE rd, rmd
+RQ 0F 4E /r   ;CMOVLE rq, rmq
+   0F 4E /r   ;CMOVNG rd, rmd
+RQ 0F 4E /r   ;CMOVNG rq, rmq
+   0F 4F /r   ;CMOVNLE rd, rmd
+RQ 0F 4F /r   ;CMOVNLE rq, rmq
+   0F 4F /r   ;CMOVG rd, rmd
+RQ 0F 4F /r   ;CMOVG rq, rmq
+
+#      == 2 byte default inst  ==
+   0F AF /r    ;IMUL rd, rmd
+RQ 0F AF /r    ;IMUL rq, rmq
+   0F AC /r ib ;SHRD rmd, rd, ib
+   0F AD /r    ;SHRD rmd, rd, CL
+RQ 0F AC /r ib ;SHRD rmq, rq, ib
+RQ 0F AD /r    ;SHRD rmq, rq, CL
+   0F A4 /r ib ;SHLD rmd, rd, ib
+   0F A5 /r    ;SHLD rmd, rd, CL
+RQ 0F A4 /r ib ;SHLD rmq, rq, ib
+RQ 0F A5 /r    ;SHLD rmq, rq, CL
+   
+   
 #DIRECT BYTES
    ib      ;DB ib
    iw      ;DW iw

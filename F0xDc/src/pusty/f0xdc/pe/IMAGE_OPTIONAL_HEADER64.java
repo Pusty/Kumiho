@@ -71,7 +71,7 @@ public class IMAGE_OPTIONAL_HEADER64 extends IMAGE_OPTIONAL_HEADER32 {
 		}
 	}
 
-	public void setImageBase64(short imageBase64) {
+	public void setImageBase64(long imageBase64) {
 		try {
 			reader.getStream().setLong(ImageBase64, imageBase64);
 		} catch (IOException e) {
@@ -90,7 +90,7 @@ public class IMAGE_OPTIONAL_HEADER64 extends IMAGE_OPTIONAL_HEADER32 {
 		}
 	}
 
-	public void setSizeOfStackReserve64(short sizeOfStackReserve64) {
+	public void setSizeOfStackReserve64(long sizeOfStackReserve64) {
 		try {
 			reader.getStream().setLong(SizeOfStackReserve64, sizeOfStackReserve64);
 		} catch (IOException e) {
@@ -108,7 +108,7 @@ public class IMAGE_OPTIONAL_HEADER64 extends IMAGE_OPTIONAL_HEADER32 {
 		}
 	}
 
-	public void setSizeOfStackCommit64(short sizeOfStackCommit64) {
+	public void setSizeOfStackCommit64(long sizeOfStackCommit64) {
 		try {
 			reader.getStream().setLong(SizeOfStackCommit64, sizeOfStackCommit64);
 		} catch (IOException e) {
@@ -126,7 +126,7 @@ public class IMAGE_OPTIONAL_HEADER64 extends IMAGE_OPTIONAL_HEADER32 {
 		}
 	}
 
-	public void setSizeOfHeapReserve64(short sizeOfHeapReserve64) {
+	public void setSizeOfHeapReserve64(long sizeOfHeapReserve64) {
 		try {
 			reader.getStream().setLong(SizeOfHeapReserve64, sizeOfHeapReserve64);
 		} catch (IOException e) {
@@ -144,7 +144,7 @@ public class IMAGE_OPTIONAL_HEADER64 extends IMAGE_OPTIONAL_HEADER32 {
 		}
 	}
 
-	public void setSizeOfHeapCommit64(short sizeOfHeapCommit64) {
+	public void setSizeOfHeapCommit64(long sizeOfHeapCommit64) {
 		try {
 			reader.getStream().setLong(SizeOfHeapCommit64, sizeOfHeapCommit64);
 		} catch (IOException e) {

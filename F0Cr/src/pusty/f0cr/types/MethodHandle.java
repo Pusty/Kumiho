@@ -5,12 +5,12 @@ public class MethodHandle {
 	int index2;
 	Object[] ref;
 	//Reference to a (type descriptor) and (index within constant pool)
-	public MethodHandle(Object[] a,int desc, int in) {
-		index = desc;
+	public MethodHandle(Object[] a,int kind, int in) {
+		index = kind;
 		index2 = in;
 		ref = a;
 	}
-	public int getTypeDescriptor() {
+	public int getKind() {
 		return index;
 	}
 	public int getIndex() {

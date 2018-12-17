@@ -14,11 +14,4 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src2</name>
-			<type>2</type>
-			<locationURI>WORKSPACE_LOC/F0xCRT/src</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

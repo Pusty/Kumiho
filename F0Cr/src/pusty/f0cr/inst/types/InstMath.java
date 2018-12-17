@@ -21,13 +21,13 @@ public class InstMath extends Instruction {
 	//IINC STUFF
 	public int getLocalVariable() {
 		if(operation==MATH_INC)
-		return (data[0]&0xFF); 
+		return (InstructionHandler.readByte(data, 0)); 
 		else return -1;
 	}
 	//IINC STUFF
 	public int getConstantValue() {
 		if(operation==MATH_INC)
-		return (data[1]&0xFF); 
+		return (InstructionHandler.readByte(data, 1)); 
 		else return -1;
 	}
 	//number of arguments f.e. arg0*arg1 or -arg0

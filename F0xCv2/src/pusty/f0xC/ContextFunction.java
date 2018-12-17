@@ -41,7 +41,6 @@ public class ContextFunction {
 	public ArrayList<Integer> getLocalVariables() {
 		return localVariables;
 	}
-	
 
 	public int getLocalVariableSize(int addrsize) {
 		return F0xUtil.calcSize(localVariables, addrsize, localVariables.size());

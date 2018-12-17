@@ -1,5 +1,7 @@
 package pusty.f0xC.rt.io;
 
+import java.io.IOException;
+
 import pusty.f0xC.lang.OverrideHandler.OverrideTranslation;
 
 
@@ -17,34 +19,42 @@ public class OPrintStream {
 		 out.flush();
 	}
 	
-    public void write(int b) {
+    public void write(int b) throws IOException  {
         out.write(b);
         if (b == '\n')
             out.flush();
     }
     
     public void write(byte buf[], int off, int len) {
-        out.write(buf, off, len);
+    	try {
+    	out.write(buf, off, len);
+    	}catch(IOException e) {e.printStackTrace();}
         out.flush();
     }
     
     private void write(char buf[]) {
+    	try {
     	for(int i=0;i<buf.length;i++)
     		out.write(buf[i]);
+    	}catch(IOException e) {e.printStackTrace();}
         for (int i = 0; i < buf.length; i++)
             if (buf[i] == '\n')
                 out.flush();
     }
 
-    private void write(String s) {
+    private void write(String s){
+    	try {
     	for(int i=0;i<s.length();i++)
     		out.write(s.charAt(i));
+    	}catch(IOException e) {e.printStackTrace();}
         if(s.indexOf('\n') >= 0)
         	out.flush();
     }
 
     private void newLine() {
+    	try {
         out.write('\n');
+    	}catch(IOException e) {e.printStackTrace();}
         out.flush();
     }
 

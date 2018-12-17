@@ -9,7 +9,7 @@ public class OInteger extends ONumber {
 	public static final int   MIN_VALUE = 0x80000000;
 	public static final int   MAX_VALUE = 0x7fffffff;
 	
-	final static char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
+	/*final static char[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
 			'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
 	
     final static char [] DigitTens = {
@@ -36,7 +36,23 @@ public class OInteger extends ONumber {
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
             '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            } ;
+            } ;*/
+	
+	protected static char digits(int i) {
+		if(i > 9)
+			return (char) ('W'+i);
+		else
+			return (char) ('0'+i);
+	}
+
+	protected static char DigitTens(int i) {
+		return (char) ('0'+(i/10));
+	}
+	
+	protected static char DigitOnes(int i) {
+		return (char) ('0'+(i%10));
+	}
+
 
 	
 	private int value;
@@ -224,10 +240,10 @@ public class OInteger extends ONumber {
 		}
 
 		while (i <= -radix) {
-			buf[charPos--] = digits[-(i % radix)];
+			buf[charPos--] = digits(-(i % radix));
 			i = i / radix;
 		}
-		buf[charPos] = digits[-i];
+		buf[charPos] = digits(-i);
 
 		if (negative) {
 			buf[--charPos] = '-';
@@ -235,7 +251,7 @@ public class OInteger extends ONumber {
 
 		return new String(buf, charPos, (33 - charPos));
 	}
-
+	
 	public static String toHexString(int i) {
 		return toUnsignedString(i, 4);
 	}
@@ -254,7 +270,7 @@ public class OInteger extends ONumber {
 		int radix = 1 << shift;
 		int mask = radix - 1;
 		do {
-			buf[--charPos] = digits[i & mask];
+			buf[--charPos] = digits(i & mask);
 			i >>>= shift;
 		} while (i != 0);
 		return new String(buf, charPos, (32 - charPos));
@@ -267,17 +283,17 @@ public class OInteger extends ONumber {
 	public static int parseInt(String s, int radix) throws ONumberFormatException{
         if (s == null)
             throw new NumberFormatException("null");
-		if (radix < Character.MIN_RADIX)
+		if (radix < OCharacter.MIN_RADIX)
 			throw new NumberFormatException("radix " + radix +
                     " less than Character.MIN_RADIX");
-		if (radix > Character.MAX_RADIX)
+		if (radix > OCharacter.MAX_RADIX)
 			throw new NumberFormatException("radix " + radix +
                     " greater than Character.MAX_RADIX");
 
 		int result = 0;
 		boolean negative = false;
 		int i = 0, len = s.length();
-		int limit = -Integer.MAX_VALUE;
+		int limit = -OInteger.MAX_VALUE;
 		int multmin;
 		int digit;
 
@@ -286,7 +302,7 @@ public class OInteger extends ONumber {
 			if (firstChar < '0') {
 				if (firstChar == '-') {
 					negative = true;
-					limit = Integer.MIN_VALUE;
+					limit = OInteger.MIN_VALUE;
 				} else if (firstChar != '+')
 					throw ONumberFormatException.forInputString(s);
 
@@ -296,7 +312,7 @@ public class OInteger extends ONumber {
 			}
 			multmin = limit / radix;
 			while (i < len) {
-				digit = Character.digit(s.charAt(i++), radix);
+				digit = OCharacter.digit(s.charAt(i++), radix);
 				if (digit < 0)
 					throw ONumberFormatException.forInputString(s);
 				if (result < multmin)

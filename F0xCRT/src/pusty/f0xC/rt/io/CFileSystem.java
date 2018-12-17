@@ -1,6 +1,9 @@
 package pusty.f0xC.rt.io;
 
-import pusty.f0xC.imports.libc.CStdio;
+import java.io.IOException;
+
+import pusty.f0xC.libc.CFile;
+import pusty.f0xC.libc.CStdio;
 
 public class CFileSystem extends OFileSystem {
     private char slash;
@@ -57,6 +60,15 @@ public class CFileSystem extends OFileSystem {
     public int hashCode(OFile f) {
         return f.getPath().toLowerCase().hashCode() ^ 1234321;
     }
+
+	@Override
+	public boolean createFileExclusively(String pathname) throws IOException {
+		CFile cf = CStdio.fopen(pathname, "x");
+		boolean result = cf.valid();
+		if(result)
+			CStdio.fclose(cf);
+		return result;
+	}
 
     
 

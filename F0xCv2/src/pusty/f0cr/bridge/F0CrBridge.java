@@ -3,11 +3,15 @@ package pusty.f0cr.bridge;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import pusty.f0cr.ClassReader;
 import pusty.f0cr.attribute.CodeAttribute;
@@ -44,13 +48,13 @@ public class F0CrBridge {
 	 * path = path to binary files
 	 * className = class in format 'I/am/a/example/ClassFile'
 	 */
-	public static ArrayList<ContextClass> runThroughClass( F0xC fox, String path, String className) {
+	public static ArrayList<ContextClass> runThroughClass(F0xC fox, String className) {
 		ArrayList<String> slist = new ArrayList<String>();
-		slist.add("pusty/f0xC/imports/Internal");
-		return runThroughClass(fox, path, className, null);
+		slist.add("pusty/f0xC/internal/Internal"); //TODO: make this arch specific
+		return runThroughClass(fox, className, null);
 	}
 
-	public static ArrayList<ContextClass> runThroughClass( F0xC fox, String path, String className, ArrayList<String> slist) {
+	public static ArrayList<ContextClass> runThroughClass( F0xC fox, String className, ArrayList<String> slist) {
 		HashMap<String, F0CrImportObject> importObjects = new HashMap<String, F0CrImportObject>();
 		
 	    HashMap<String, String> replaceMap = null;	
@@ -59,17 +63,17 @@ public class F0CrBridge {
 			replaceMap = fox.getParser().getOverrideHandler().getClassOverrides();
 		}
 		
-		runThroughClass(importObjects,fox,path,className, null);
+		runThroughClass(importObjects,fox,className, null);
 		
 		if(replaceMap != null && replaceMap.containsKey("java/lang/String"))
-			runThroughClass(importObjects,fox,path, replaceMap.get("java/lang/String"), "java/lang/String");
+			runThroughClass(importObjects,fox, replaceMap.get("java/lang/String"), "java/lang/String");
 		
 		if(replaceMap != null && replaceMap.containsKey("java/lang/Class"))
-			runThroughClass(importObjects,fox,path, replaceMap.get("java/lang/Class"), "java/lang/Class");
+			runThroughClass(importObjects,fox, replaceMap.get("java/lang/Class"), "java/lang/Class");
 		
 		if(slist != null)
 			for(String str:slist)
-				runThroughClass(importObjects,fox,path,str, null);
+				runThroughClass(importObjects,fox,str, null);
 		
 		ArrayList<ContextClass> result = new ArrayList<ContextClass>();
 		
@@ -125,7 +129,7 @@ public class F0CrBridge {
 			decon.setFunctionName("<destroy>");
 			decon.setFullName("<destroy>");
 			decon.setType(ContextFunction.LOCAL);
-			decon.addParameter(F0xUtil.convertedSize(F0xUtil.convertedType(Object.class), fox.getParser().getAddressSize()));
+			decon.addParameter(F0xUtil.convertedType(Object.class));
 			decon.setTypes(new Class<?>[] {Object.class, null});
 			decon.addProperty(TranslationProperty.NO_GARBAGE_COLLECT);
 			ArrayList<Node> deconList = new ArrayList<Node>();
@@ -169,12 +173,57 @@ public class F0CrBridge {
 			System.out.println("[#] Class '"+override+"' registered using '"+className+"'");
 	}
 	
-	private static void runThroughClass(HashMap<String, F0CrImportObject> importObjects, F0xC fox, String path, String className, String override) {
+	private static ArrayList<String> pathList = null;
+	public static ArrayList<String> getPaths() {
+		if(pathList == null) {
+			pathList = new ArrayList<String>();
+			pathList.add(System.getProperty("user.dir")+"/");
+		}
+		return pathList;
+	}
+	public static void addPath(String path) {
+		if(!getPaths().contains(path))
+			getPaths().add(path);
+	}
+	
+	private static InputStream searchPath(String pathName) {
+		ArrayList<String> paths = getPaths();
+		for(String path:paths) {
+			try {
+				File file = new File(path);
+				if(!file.exists()) {
+					System.err.println("[!] '"+file.getAbsolutePath()+"' wasn't found!");
+				}else if(file.isDirectory()) {
+					File sub = new File(file.getAbsolutePath()+"/"+pathName+".class");
+					if(sub.exists()) {
+						//System.out.println("[D] "+sub.getAbsolutePath());
+						return new FileInputStream(sub);
+					}
+				}else if(file.getName().toLowerCase().endsWith(".zip") || file.getName().toLowerCase().endsWith(".jar")) {
+					ZipFile zip = new ZipFile(file);
+					if (zip != null) {
+					   Enumeration<? extends ZipEntry> entries = zip.entries();
+					   if (entries != null)
+					      while (entries.hasMoreElements()) {
+					          ZipEntry entry = entries.nextElement();
+					          System.out.println("[D] "+entry.getName());
+					          if(entry.getName().equals(pathName+".class"))
+					        	  return zip.getInputStream(entry); //zip file isn't closed on return :U
+					      }
+					}
+					zip.close();
+				}else {
+					System.err.println("[!] Don't know how to handle the search path '"+file.getAbsolutePath()+"'");
+				}
+			}catch(Exception e) { e.printStackTrace(); }
+		}
+		System.err.println("[!] Didn't find the class '"+pathName+"'");
+		return null;
+	}
+	private static void runThroughClass(HashMap<String, F0CrImportObject> importObjects, F0xC fox, String className, String override) {
 		try {
 			String pathName = className;
-			File file = new File(path+pathName+".class");
-			
-			FileInputStream fis = new FileInputStream(file);		
+			InputStream fis = searchPath(pathName);//new File(path+pathName+".class");	
 			ClassReader reader = new ClassReader(fis);
 			fis.close();
 			
@@ -182,7 +231,7 @@ public class F0CrBridge {
 	        String classNameA = className;
 
 	        
-			F0CrImportObject iObject = new F0CrImportObject(reader, path, classNameA, override, 1);
+			F0CrImportObject iObject = new F0CrImportObject(reader, classNameA, override, 1);
 			importObjects.put(override==null?reader.getClassName():override, iObject);
 
 			
@@ -236,7 +285,7 @@ public class F0CrBridge {
 
 					if(overrideNext.equals(ref_name))
 						overrideNext = null;
-					runThroughClass(importObjects,fox,path,ref_name, overrideNext);
+					runThroughClass(importObjects,fox,ref_name, overrideNext);
 				}
 		}
 		}catch(FileNotFoundException e) {
@@ -306,10 +355,10 @@ public class F0CrBridge {
 			
 
 			if(!AccessFlags.isStatic(mi.getAccessFlags()))
-				context.addParameter(F0xUtil.convertedSize(F0xUtil.convertedType(Object.class), fox.getParser().getAddressSize()));
+				context.addParameter(F0xUtil.convertedType(Object.class));
 
 			for(int i=0;i<cl.length-1;i++)
-				context.addParameter(F0xUtil.convertedSize(F0xUtil.convertedType(cl[i]), fox.getParser().getAddressSize()));
+				context.addParameter(F0xUtil.convertedType(cl[i]));
 			//SPECIAL ATTRIBUTES FOR FUNCTIONS! :O
 			for(AttributeInfo info:mi.getInfo().getIndexes()) {
 				if(info.getAttribute().equals("RuntimeInvisibleAnnotations")) {
@@ -376,10 +425,10 @@ public class F0CrBridge {
 			LocalVariableInfo[] data = code.getLocalVariableTable().getTable();
 
 			for(int i=context.getParameters().size();i<data.length;i++)
-				context.addLocalVariable(F0xUtil.convertedSize(data[i].getDesc(), fox.getParser().getAddressSize()));
+				context.addLocalVariable(F0xUtil.convertedType(F0xUtil.convertDescriptor(data[i].getDesc().charAt(0))));
 			
 		    for(int i=data.length;i<code.getMaxLocals();i++)
-				context.addLocalVariable(F0xUtil.convertedSize("L", fox.getParser().getAddressSize()));		 //TODO: make this more dynamic
+				context.addLocalVariable(F0xUtil.convertedType(F0xUtil.convertDescriptor('L')));		 //TODO: make this more dynamic
 			
 			Integer[] array = new Integer[1];
 			array[0] = 0;
@@ -405,11 +454,11 @@ public class F0CrBridge {
 						int convSize = F0xUtil.convertedType(F0xUtil.convertDescriptor(info.getDesc().charAt(0)));
 						if(key == info.getStart()+info.getLength() && info.getIndex() >= context.getParameters().size()) {
 							if(convSize == Node.ADDR) {
-								nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex())));	
+								nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex(), fox.getParser().getAddressSize())));	
 								nodeList.add(new NodeObject(NodeObject.FREE, null));						
 							}
 							nodeList.add(new NodeConst(convSize, 0));
-							nodeList.add(new NodeVarFix(convSize, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, info.getIndex())));	
+							nodeList.add(new NodeVarFix(convSize, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, info.getIndex(), fox.getParser().getAddressSize())));	
 						}
 					}
 					nodeList.addAll(list);
@@ -417,7 +466,7 @@ public class F0CrBridge {
 			}
 					
 			nodeList.add(new NodeLabel(-1));
-			nodeList.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
+			nodeList.add(new NodeStack(Node.ADDR, NodeStack.PUSH_0));
 			
 			int lastIndexFreed = -1;
 			for(LocalVariableInfo info:code.getLocalVariableTable().getTable()) {
@@ -426,7 +475,7 @@ public class F0CrBridge {
 				if(info.getIndex() > lastIndexFreed) lastIndexFreed = info.getIndex(); //to prevent freeing the same variable twice because it was assigned to be store object more than once
 				else continue;
 				if(array[array.length-1] < info.getStart()+info.getLength() && F0xUtil.calcIndex(context.getParameters(), context.getLocalVariables(), fox.getParser().getAddressSize(), info.getIndex()) >= parameterSize) {
-					nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex())));	
+					nodeList.add(new NodeVarFix(Node.ADDR, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, info.getIndex(), fox.getParser().getAddressSize())));	
 					nodeList.add(new NodeObject(NodeObject.FREE, null));
 				}
 			}
@@ -438,7 +487,7 @@ public class F0CrBridge {
 				//nodeList.add(new NodeObject(NodeObject.FREE, null));
 		//	}
 			
-			nodeList.add(new NodeStack(Node.INT32, NodeStack.POP_0));
+			nodeList.add(new NodeStack(Node.ADDR, NodeStack.POP_0));
 			//code.getLocalVariableTable().printOut("");
 			//System.out.println(overrideName+"_"+mi.getName()+"_"+mi.getDescriptor()+":");
 			//code.getInst().printOut("   ");
@@ -449,11 +498,11 @@ public class F0CrBridge {
 	}
 	
 	//offset to index string, used to convert java offsets to sizeless offsets
-	private static String o2is(ContextFunction f, int offset) {
-		int a = F0xUtil.calcIndex(f.getParameters(), f.getLocalVariables(), 4, offset);
-		//if(f.getFullName().contains("main")) {
-		//	System.out.println("F0xUtil@calcIndex something went wrong: "+f.getParameters()+" "+f.getLocalVariables()+" <- "+offset+"("+a+")");
-		//}
+	private static String o2is(ContextFunction f, int offset, int addrSize) {
+		int a = F0xUtil.calcIndex(f.getParameters(), f.getLocalVariables(), addrSize, offset); //TODO: make this changable
+		/*if(f.getSanitizedFullName().contains("getChars_JI_C_V")) {
+			System.out.println("F0xUtil@calcIndex something went wrong: "+f.getParameters()+" "+f.getLocalVariables()+" <- "+offset+"("+a+")");
+		}*/
 		return Integer.toString(a);
 	}
 	
@@ -467,13 +516,18 @@ public class F0CrBridge {
 			if(obj != null && obj instanceof StringReference) {
 				obj = inst.getConstantPool().get(((StringReference)obj).getIndex());
 			}
+			if(obj != null && obj instanceof ClassReference) {
+				ClassReference cref = (ClassReference)obj;
+				String className = filterMap(inst.getConstantPool().get(cref.getIndex()).toString(), replaceMap);
+				obj = new ContextClass.ContextClassReference(className);
+			}
 			list.add(new NodeConst(value, obj));
 			list.add(new NodeStack(value, NodeStack.PUSH_0));
 		}else if(instRaw instanceof InstLocalVar) {
 			InstLocalVar inst = (InstLocalVar)instRaw;
 			int value = F0xUtil.convertedType(inst.getType());
 			if(inst.isLoad()) {
-				list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable())));	
+				list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable(), fox.getParser().getAddressSize())));	
 				list.add(new NodeStack(value, NodeStack.PUSH_0));
 			}
 			if(inst.isStore()) {
@@ -487,7 +541,7 @@ public class F0CrBridge {
 						}
 					}
 					if(freeIt) {
-						list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable())));	
+						list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getVariable(), fox.getParser().getAddressSize())));	
 						list.add(new NodeObject(NodeObject.FREE, null));
 					}
 				}
@@ -496,7 +550,7 @@ public class F0CrBridge {
 				if(value == Node.ADDR)
 					list.add(new NodeObject(NodeObject.REFERENCE, null));
 				
-				list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, inst.getVariable())));
+				list.add(new NodeVarFix(value, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, inst.getVariable(), fox.getParser().getAddressSize())));
 			}
 		}else if(instRaw instanceof InstVar) {
 			InstVar inst = (InstVar)instRaw;
@@ -545,7 +599,7 @@ public class F0CrBridge {
 			InstMath inst = (InstMath)instRaw;
 			int size = F0xUtil.convertedType(inst.getType());
 			if(inst.getOperationType() == InstMath.MATH_INC) {
-				list.add(new NodeVarFix(size, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getLocalVariable())));
+				list.add(new NodeVarFix(size, NodeVarFix.LOCAL, NodeVarFix.LOAD, o2is(context, inst.getLocalVariable(), fox.getParser().getAddressSize())));
 				list.add(new NodeStack(size, NodeStack.PUSH_0));
 				if(((byte)inst.getConstantValue()) < 0)
 					list.add(new NodeConst(size, -((byte)inst.getConstantValue())));
@@ -558,7 +612,7 @@ public class F0CrBridge {
 					list.add(new NodeMath(size, NodeMath.SUB));
 				else
 					list.add(new NodeMath(size, NodeMath.ADD));
-				list.add(new NodeVarFix(size, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, inst.getLocalVariable())));
+				list.add(new NodeVarFix(size, NodeVarFix.LOCAL, NodeVarFix.SAVE, o2is(context, inst.getLocalVariable(), fox.getParser().getAddressSize())));
 			}else if(inst.getOperationType() == InstMath.MATH_NEG) {
 				list.add(new NodeStack(size, NodeStack.POP_0));
 				list.add(new NodeMath(size, NodeMath.NEG));
@@ -862,6 +916,16 @@ public class F0CrBridge {
 					list.add(new NodeStack(Node.INT32, NodeStack.PUSH_0));
 					break;
 			}
+		}else if(instRaw instanceof InstTable) {
+			InstTable inst = (InstTable)instRaw;
+			list.add(new NodeStack(Node.INT32, NodeStack.POP_1));
+			for(int i=0;i<inst.getBranchIndex().length;i++) {
+				list.add(new NodeConst(Node.INT32, inst.getBranchIndex()[i]));
+	        	list.add(new NodeCompare(Node.INT32, NodeCompare.COMPARE_EQUAL));
+	        	list.add(new NodeJump(Node.UNKNOWN, NodeJump.JUMP_EQUALS, instIndex+inst.getBranchList()[i]));
+			}
+			list.add(new NodeJump(Node.UNKNOWN, NodeJump.JUMP_ALWAYS, instIndex+inst.getBranchDefault()));
+			
 		}else if(instRaw.getName().equals("NEW")) {
 			int poolIndex = ((((instRaw.getData()[0]&0xFF) << 8) + (instRaw.getData()[1]&0xFF)));
 			String cN = (instRaw.getConstantPool().get(((ClassReference)instRaw.getConstantPool().get(poolIndex)).getIndex())).toString();
@@ -927,26 +991,18 @@ public class F0CrBridge {
 	}
 	
     public static class F0CrImportObject {
-    	private String path;
     	private String className;
     	private String override;
     	private int priority;
     	private ClassReader reader;
     	
-    	public F0CrImportObject(ClassReader reader, String path, String className, String override, int priority) {
-    		this.path = path;
+    	public F0CrImportObject(ClassReader reader, String className, String override, int priority) {
     		this.className = className;
     		this.override = override;
     		this.priority = priority;
     		this.reader = reader;
     	}
     	
-		public String getPath() {
-			return path;
-		}
-		public void setPath(String path) {
-			this.path = path;
-		}
 		public String getClassName() {
 			return className;
 		}

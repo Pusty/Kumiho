@@ -161,7 +161,7 @@ public class F0xUtil {
 	public static int calcSize(ArrayList<Integer> li, int addrsize, int index) {
 		int o = 0;
 		for(int i=0;i<index;i++) {
-			int le = li.get(i);
+			int le = F0xUtil.convertedSize(li.get(i), addrsize);
 			o += le/addrsize;
 			if(le%addrsize != 0)
 				o += 1;
@@ -172,20 +172,82 @@ public class F0xUtil {
 	//helper function to reverse offsets to index
 	//used to convert Java's fixed offsets to "sizeless" offsets that can be converted
 	public static int calcIndex(ArrayList<Integer> li1,ArrayList<Integer> li2, int addrsize, int offset) {
-		int o = 0;
+		int o = offset;
+		int p = 0;
 		for(int i=0;i<li1.size();i++) {
-			if(o == offset) return i;
-			//int le = li1.get(i);
-			o += 1;//le>=addrsize?le/addrsize:1;
+			if(o<=0) return p;
+			if(addrsize == 8 && (li1.get(i) == Node.INT64 || li1.get(i) == Node.DOUBLE))
+				o -= 2;
+			else
+				o -= 1;
+			p++;
+		}
+		
+		for(int i=0;i<li2.size();i++) {
+			if(o<=0) return p;
+			if(addrsize == 8 && (li2.get(i) == Node.INT64 || li2.get(i) == Node.DOUBLE))
+				o -= 2;
+			else
+				o -= 1;
+			p++;
+		}
+		
+		if(o!=0) {
+			System.err.println("F0xUtil@calcIndex something went wrong: "+li1+" "+li2+" <- "+offset+"("+o+")");
+			System.err.println(1/0);
+		}
+		return p;
+		
+		/*int o = 0;
+		for(int i=0;i<li1.size();i++) {
+			if((o>>1) == offset) return i;
+			if(li1.get(i) == Node.ADDR)
+				o += 2;
+			else if(addrsize > 4 && (li1.get(i) == Node.INT64 || li1.get(i) == Node.DOUBLE))
+				o += 2;
+			else
+				o += 2;//F0xUtil.convertedSize(li1.get(i), addrsize)/addrsize;
 		}
 		for(int i=0;i<li2.size();i++) {
-			if(o == offset) return li1.size()+i;
-			//int le = li2.get(i);
-			o += 1;//le>=addrsize?le/addrsize:1;
+			if((o>>1) == offset) return li1.size()+i;
+			if(li2.get(i) == Node.ADDR)
+				o += 2;
+			else if(addrsize > 4 && (li2.get(i) == Node.INT64 || li2.get(i) == Node.DOUBLE))
+				o += 2;
+			else
+				o += 2;//F0xUtil.convertedSize(li2.get(i), addrsize)/addrsize;
 		}
-		if(o == offset) return li1.size()+li2.size();
-		System.err.println("F0xUtil@calcIndex something went wrong: "+li1+" "+li2+" <- "+offset+"("+o+")");
-		return -1;
+		if((o>>1) == offset) return li1.size()+li2.size();
+		System.err.println("F0xUtil@calcIndex something went wrong: "+li1+" "+li2+" <- "+offset+"("+(o>>1)+")");
+		System.err.println(1/0);
+		return -1;*/
+		//[6, 2] [3, 0, 2, 2, 3, 3, 3, 2, 0, 6, 6]
+		// 0, 1,  2, 4, 5, 6, 7, 9,11,13,14,15,16]
+	}
+	
+
+	public static String getStringVarName(String str) {
+		return "stringmap_"+Integer.toHexString(str.hashCode());
+	}
+	
+	public static String formatFunction(String str) {
+		String label = str.replace('/', '_').replace('.', '_').replace('<', '$').replace('>', '$');
+		return "function_"+ContextFunction.hashFunctionName(label)+"_line_start";
+	}
+	
+	public static String getDoubleVarName(double f) {
+		return "doublemap_"+Integer.toHexString(Double.hashCode(f));
+	}
+	
+	public static String getFloatVarName(float f) {
+		return "floatmap_"+Integer.toHexString(Float.hashCode(f));
+	}
+	
+	public static String getClassReferenceString(ContextClass nO) {
+		return  (nO.getClassName()+"_class").replace('/', '_');
+	}
+	public static String formatVariable(String ref) {
+		return ref.replace('.', '_').replace('/', '_');
 	}
 	
 }

@@ -22,7 +22,24 @@ public class InstructionHandler {
 		if(InstStack.isInst(inst))
 			return new InstStack(reader, inst, data);
 		if(InstVar.isInst(inst))
-			return new InstVar(reader, inst, data);	
+			return new InstVar(reader, inst, data);
+		if(InstTable.isInst(inst))
+			return new InstTable(reader, inst, data);
 		return new Instruction(reader, inst, data);
+	}
+	
+	
+	//Unified function for reading data from the arrays correctly signed in an efficient and unified way
+	
+	public static int readInt(byte[] data, int index) {
+		 return ((int)(((data[index]) << 24) + ((data[index+1]&0xFF) << 16) + ((data[index+2]&0xFF) << 8) + (data[index+3]&0xFF)));
+	}
+	
+	public static int readShort(byte[] data, int index) {
+		return ((int)(((data[index]) << 8) + (data[index+1]&0xFF)));
+	}
+	
+	public static int readByte(byte[] data, int index) {
+		return ((int)(data[index]&0xFF));
 	}
 }

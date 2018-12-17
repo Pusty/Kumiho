@@ -173,9 +173,9 @@ public class Opcodes {
     public static final int GOTO = 167; //BRANCH
     public static final int JSR = 168; //BRANCH
     public static final int RET = 169; //BRANCH
-    public static final int TABLESWITCH = 170; /**TODO: TABLE STUFF*/
-    public static final int LOOKUPSWITCH = 171; 
-    public static final int IRETURN = 172; //BRANCH /**TODO: MAYBE SPLIT BRANCH AND RETURN */
+    public static final int TABLESWITCH = 170; //TABLE
+    public static final int LOOKUPSWITCH = 171; //TABLE
+    public static final int IRETURN = 172; //BRANCH
     public static final int LRETURN = 173; //BRANCH
     public static final int FRETURN = 174; //BRANCH
     public static final int DRETURN = 175; //BRANCH

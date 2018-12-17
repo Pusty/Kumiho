@@ -1,5 +1,7 @@
 package pusty.f0xC.rt.io;
 
+import java.io.IOException;
+
 import pusty.f0xC.lang.OverrideHandler.OverrideTranslation;
 
 @OverrideTranslation(override = "java/io/File")
@@ -280,25 +282,25 @@ public class OFile {
         return fs.getLength(this);
     }*/
     
-    /*public boolean createNewFile() throws IOException {
-        SecurityManager security = System.getSecurityManager();
-        if (security != null) security.checkWrite(path);
+    public boolean createNewFile() throws IOException {
         if (isInvalid()) {
             throw new IOException("Invalid file path");
         }
         return fs.createFileExclusively(path);
-    }*/
+        
+    }
     
     public boolean delete() {
-       /* SecurityManager security = System.getSecurityManager();
-        if (security != null) {
-            security.checkDelete(path);
-        }
         if (isInvalid()) {
             return false;
-        }*/
+        }
         return fs.delete(this);
     }
+    
+    public boolean isAbsolute() {
+        return this.path.startsWith("/") || (this.path.length()>2 && this.path.charAt(1)==':');
+    }
+
     
     /*public void deleteOnExit() {
         SecurityManager security = System.getSecurityManager();

@@ -16,7 +16,7 @@ public class InstCompare extends Instruction {
 		if(!isInst(inst)) {System.err.println("Error: Created Compare with OpCode: "+inst+" => " +Opcodes.getName(inst));}
 		type = setType();
 		if(type == Object.class)
-			classInfo = (ClassReference) pool.get(((data[0]&0xFF) << 8)+(data[1]&0xFF));
+			classInfo = (ClassReference) pool.get(InstructionHandler.readShort(data, 0));
 	}
 	public Class<?> getType() {
 		return type;

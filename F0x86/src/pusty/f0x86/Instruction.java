@@ -16,42 +16,47 @@ public class Instruction {
 	String[] opcode_params;
 	
 	public Instruction(String line) {
-		String prefix = line.substring(0, 2);
-		
-		if(prefix.equalsIgnoreCase("RW")) {
-			this.prefix = new byte[] {0x66};
-		}else if(prefix.equalsIgnoreCase("RQ")) {
-			this.prefix = new byte[] {0x48};
-		}else if(prefix.equalsIgnoreCase("RX")) {
-			this.prefix = new byte[] {(byte) 0xFF};
-		}else {
-			this.prefix = null;
-		}
-		
-		line = line.substring(3);
-		String mnemonics = line.split(";")[1].trim();
-		if(mnemonics.indexOf(' ') == -1) {
-			this.mnemonic = mnemonics.trim().toLowerCase();
-			this.mnemonic_params = new String[] {};
-		}else {
-			this.mnemonic = mnemonics.substring(0, mnemonics.indexOf(' ')).trim().toLowerCase();
-			this.mnemonic_params = mnemonics.substring(mnemonics.indexOf(' ')).split(",");
-		}
-		for(int i=0;i<this.mnemonic_params.length;i++) this.mnemonic_params[i] = this.mnemonic_params[i].trim().toLowerCase();
-		String[] opcodes   = line.split(";")[0].trim().split(" ");
-		ArrayList<Byte> opcode = new ArrayList<Byte>();
-		for(int i=0;i<opcodes.length;i++) {
-			try {
-				opcode.add((byte) Integer.parseInt(opcodes[i], 16));
-			}catch(Exception e) {
-				break;
+		try {
+			String prefix = line.substring(0, 2);
+			
+			if(prefix.equalsIgnoreCase("RW")) {
+				this.prefix = new byte[] {0x66};
+			}else if(prefix.equalsIgnoreCase("RQ")) {
+				this.prefix = new byte[] {0x48};
+			}else if(prefix.equalsIgnoreCase("RX")) {
+				this.prefix = new byte[] {(byte) 0xFF};
+			}else {
+				this.prefix = null;
 			}
+			
+			line = line.substring(3);
+			String mnemonics = line.split(";")[1].trim();
+			if(mnemonics.indexOf(' ') == -1) {
+				this.mnemonic = mnemonics.trim().toLowerCase();
+				this.mnemonic_params = new String[] {};
+			}else {
+				this.mnemonic = mnemonics.substring(0, mnemonics.indexOf(' ')).trim().toLowerCase();
+				this.mnemonic_params = mnemonics.substring(mnemonics.indexOf(' ')).split(",");
+			}
+			for(int i=0;i<this.mnemonic_params.length;i++) this.mnemonic_params[i] = this.mnemonic_params[i].trim().toLowerCase();
+			String[] opcodes   = line.split(";")[0].trim().split(" ");
+			ArrayList<Byte> opcode = new ArrayList<Byte>();
+			for(int i=0;i<opcodes.length;i++) {
+				try {
+					opcode.add((byte) Integer.parseInt(opcodes[i], 16));
+				}catch(Exception e) {
+					break;
+				}
+			}
+			this.opcode = new byte[opcode.size()];
+			for(int i=0;i<opcode.size();i++)
+				this.opcode[i] = opcode.get(i);
+			this.opcode_params = new String[opcodes.length-opcode.size()];
+			for(int i=0;i<this.opcode_params.length;i++) this.opcode_params[i] = opcodes[i+opcode.size()].trim().toLowerCase();
+		}catch(Exception e) {
+			System.err.println("Error parsing line: '"+line+'"');
+			e.printStackTrace();
 		}
-		this.opcode = new byte[opcode.size()];
-		for(int i=0;i<opcode.size();i++)
-			this.opcode[i] = opcode.get(i);
-		this.opcode_params = new String[opcodes.length-opcode.size()];
-		for(int i=0;i<this.opcode_params.length;i++) this.opcode_params[i] = opcodes[i+opcode.size()].trim().toLowerCase();
 	}
 	
 	public static boolean confirmREGinMODRM(int i, int reg) {
@@ -84,21 +89,6 @@ public class Instruction {
 					System.err.println("Instruction.java@classifyValue: Unknown Register Type");
 			return output;
 		}
-		try {
-			long value = parseNumber(input);
-			if(value <= 0xFF && value >= -0x7F)
-				output = "ib";
-			else if(value <= 0xFFFF && value >= -0x7FFF)
-				output = "iw";
-			else if(value <= 0xFFFFFFFFL && value >= -0x7FFFFFFFL)
-				output = "id";
-			else if(value <= 0x7FFFFFFFFFFFFFFFL && value >= -0x7FFFFFFFFFFFFFFFL)
-				output = "iq";
-			else
-				if(DEBUG)
-					System.err.println("Instruction.java@classifyValue: Unknown Immediate Value");
-			return output;
-		}catch(Exception e) {}
 		int size = 0;
 		if(input.contains(" ")) {
 			String keyword = input.substring(0, input.indexOf(" "));
@@ -117,7 +107,7 @@ public class Instruction {
 			while(input.indexOf(" ") != -1)
 				input = input.substring(input.indexOf(" ")+1);
 		}
-		if(input.startsWith("[") && input.endsWith("]")) {
+		if(input.charAt(0) == '[' && input.charAt(input.length()-1) == ']') {
 			if(size == MASK_SIZE_BYTE)
 				return "mb";
 			else if(size == MASK_SIZE_WORD)
@@ -129,15 +119,43 @@ public class Instruction {
 			else if(size == 0)
 				return "mu";
 		}
+		
+		//if(input.matches("-?(0x|0X)?[\\da-f]+(h|H|O|o|b|B)?")) { //open for a better regex here
+			try {
+				long value = parseNumber(input); //if this becomes a problem again, try with a lenght based approach instead
+				if(value <= 0xFF && value >= -0x7F)
+					output = "ib";
+				else if(value <= 0xFFFF && value >= -0x7FFF)
+					output = "iw";
+				else if(value <= 0xFFFFFFFFL && value >= -0x7FFFFFFFL)
+					output = "id";
+				else if(value <= 0x7FFFFFFFFFFFFFFFL && value >= -0x7FFFFFFFFFFFFFFFL)
+					output = "iq";
+				else
+					if(DEBUG)
+						System.err.println("Instruction.java@classifyValue: Unknown Immediate Value");
+				return output;
+			}catch(Exception e) {}
+		//}
+		
 		return output;
 	}
 	
 	//Confirm that this is a valid type
 	public boolean isType(String type) {
-		if(type.equalsIgnoreCase("rb") || type.equalsIgnoreCase("rw")  || type.equalsIgnoreCase("rd") || type.equalsIgnoreCase("rq")) return true;
-		if(type.equalsIgnoreCase("rmb")|| type.equalsIgnoreCase("rmw") || type.equalsIgnoreCase("rmd") || type.equalsIgnoreCase("rmq")) return true;
-		if(type.equalsIgnoreCase("mb") || type.equalsIgnoreCase("mw")  || type.equalsIgnoreCase("md") || type.equalsIgnoreCase("mq") || type.equalsIgnoreCase("mu")) return true; //DOES THIS EVEN EXIST?
-		if(type.equalsIgnoreCase("ib") || type.equalsIgnoreCase("iw")  || type.equalsIgnoreCase("id") || type.equalsIgnoreCase("iq")) return true;
+	    char f = Character.toLowerCase(type.charAt(0));
+		char l = Character.toLowerCase(type.charAt(type.length()-1));
+	    if(f == 'r' || f == 'm' || f == 'i') {
+	    	if(type.length() == 2 || (f == 'r' && type.length() == 3 && Character.toLowerCase(type.charAt(1)) == 'm'))
+	    		if(l == 'b' || l == 'w' || l == 'd' || l == 'q') 
+	    			return true;
+	    		else if(l == 'u' && f == 'm')
+	    			return true;
+	    }
+		//if(type.equalsIgnoreCase("rb") || type.equalsIgnoreCase("rw")  || type.equalsIgnoreCase("rd") || type.equalsIgnoreCase("rq")) return true;
+		//if(type.equalsIgnoreCase("rmb")|| type.equalsIgnoreCase("rmw") || type.equalsIgnoreCase("rmd") || type.equalsIgnoreCase("rmq")) return true;
+		//if(type.equalsIgnoreCase("mb") || type.equalsIgnoreCase("mw")  || type.equalsIgnoreCase("md") || type.equalsIgnoreCase("mq") || type.equalsIgnoreCase("mu")) return true; //DOES THIS EVEN EXIST?
+		//if(type.equalsIgnoreCase("ib") || type.equalsIgnoreCase("iw")  || type.equalsIgnoreCase("id") || type.equalsIgnoreCase("iq")) return true;
 		return false;
 	}
 	
@@ -153,36 +171,38 @@ public class Instruction {
 	public static final int MASK_ALLOW_IMMEDIATE = 64;
 	
 	public String maskToString(int mask) {
-		String output = "";
+		StringBuilder output = new StringBuilder();
 		if((mask&MASK_SIZE_BYTE) != 0)
-			output += "BYTE|";
+			output.append("BYTE|");
 		if((mask&MASK_SIZE_WORD) != 0)
-			output += "WORD|";
+			output.append("WORD|");
 		if((mask&MASK_SIZE_DWORD) != 0)
-			output += "DWORD|";
+			output.append("DWORD|");
 		if((mask&MASK_SIZE_QWORD) != 0)
-			output += "QWORD|";
+			output.append("QWORD|");
 		if((mask&MASK_ALLOW_MEMORY) != 0)
-			output += "MEMORY|";
+			output.append("MEMORY|");
 		if((mask&MASK_ALLOW_REGISTER) != 0)
-			output += "REGISTER|";
+			output.append("REGISTER|");
 		if((mask&MASK_ALLOW_IMMEDIATE) != 0)
-			output += "IMMEDIATE|";
-		if(output.endsWith("|"))
-			output = output.substring(0, output.length()-1);
-		return output;
+			output.append("IMMEDIATE|");
+		if(output.charAt(output.length()-1) == '|')
+			return output.substring(0, output.length()-1);
+		return output.toString();
 	}
 	
 	public int numberfyType(String type) {
 		if(!isType(type)) return -1;
 		int mask = 0;
-		if(type.endsWith("b") || type.endsWith("B")) mask = mask | MASK_SIZE_BYTE;
-		else if(type.endsWith("w") || type.endsWith("W")) mask = mask | MASK_SIZE_WORD;
-		else if(type.endsWith("d") || type.endsWith("D")) mask = mask | MASK_SIZE_DWORD;
-		else if(type.endsWith("q") || type.endsWith("Q")) mask = mask | MASK_SIZE_QWORD;	
+		char first = Character.toLowerCase(type.charAt(0));
+		char last = Character.toLowerCase(type.charAt(type.length()-1));
+		if(last == 'b') mask = mask | MASK_SIZE_BYTE;
+		else if(last == 'w') mask = mask | MASK_SIZE_WORD;
+		else if(last == 'd') mask = mask | MASK_SIZE_DWORD;
+		else if(last == 'q') mask = mask | MASK_SIZE_QWORD;	
 		if(type.contains("m") || type.contains("M")) 	  mask = mask | MASK_ALLOW_MEMORY;
-		if(type.contains("r") || type.contains("R"))	  mask = mask | MASK_ALLOW_REGISTER;
-		if(type.contains("i") || type.contains("I"))	  mask = mask | MASK_ALLOW_IMMEDIATE;
+		if(first == 'r')	  mask = mask | MASK_ALLOW_REGISTER;
+		if(first == 'i')	  mask = mask | MASK_ALLOW_IMMEDIATE;
 		return mask;
 	}
 	//Checks if value/type main includes value/type sub
@@ -213,27 +233,22 @@ public class Instruction {
 		}
 	}
 	
-	public long parseNumber(String input) throws Exception {
-		if(input.contains("h") || input.contains("H") || input.contains("0x") || input.contains("0X")) {
-			input = input.replace("h", "");
-			input = input.replace("H", "");
-			input = input.replace("0x", "");
-			input = input.replace("0X", "");
-			return Long.parseLong(input,16);
-		}else if(input.contains("b") || input.contains("B") ) {
-			input = input.replace("b", "");
-			input = input.replace("B", "");
-			return Long.parseLong(input,2);
-		}else if(input.contains("o") || input.contains("O") ) {
-			input = input.replace("o", "");
-			input = input.replace("O", "");
-			return Long.parseLong(input,8);
+	public static long parseNumber(String input) throws Exception {
+		char last = input.charAt(input.length()-1);
+		int offset = (input.charAt(0) == '-' ||  input.charAt(0) == '+')?1:0;
+		if(input.length() > 1 && input.charAt(0+offset) == '0' && (input.charAt(1+offset) == 'x' || input.charAt(1+offset) == 'X')) {
+			return Long.parseLong((offset>0?input.charAt(0):"")+input.substring(2+offset),16);
+		}else if(last == 'h' || last == 'H') {
+			return Long.parseLong(input.substring(0, input.length()-1),16);
+		}else if(last == 'b' || last == 'B') {
+			return Long.parseLong(input.substring(0, input.length()-1),2);
+		}else if(last == 'o' || last == 'O') {
+			return Long.parseLong(input.substring(0, input.length()-1),8);
 		}else
 			return Long.parseLong(input, 10);
 	}
 	
 	public String outputNumber(long value) {
-		
 		return "0x"+Long.toHexString(value);
 	}
 	
@@ -439,48 +454,51 @@ public class Instruction {
 	
 	public byte[] encode(String parse, boolean strict) {
 		String   mnemonics = parse.toLowerCase();
-		String   mnemonic = mnemonics.trim().toLowerCase();
-		String[] mnemonic_params = new String[] {};
-		if(mnemonics.indexOf(' ') != -1) {
-			mnemonic        = mnemonics.substring(0, mnemonics.indexOf(' ')).trim().toLowerCase();
-			mnemonic_params = mnemonics.substring(mnemonics.indexOf(' ')).split(",");
+		String   mnemonic = null;
+		String[] mnemonic_params = null;
+		int iOS = mnemonics.indexOf(' ');
+		if(iOS != -1) {
+			mnemonic        = mnemonics.substring(0, iOS).trim();
+			mnemonic_params = mnemonics.substring(iOS).split(",");
+		}else {
+			mnemonic = mnemonics.trim();
+			mnemonic_params = new String[] {};
 		}
-		for(int i=0;i<mnemonic_params.length;i++) mnemonic_params[i] = mnemonic_params[i].trim().toLowerCase();
-		if(!this.mnemonic.equalsIgnoreCase(mnemonic)) return null;
+		for(int i=0;i<mnemonic_params.length;i++) mnemonic_params[i] = mnemonic_params[i].trim();
 		if(this.mnemonic_params.length != mnemonic_params.length) return null;
+		if(!this.mnemonic.equals(mnemonic)) return null;
 		boolean[] matches = new boolean[mnemonic_params.length];
 		for(int i=0;i<mnemonic_params.length;i++)
 			matches[i] = includes(this.mnemonic_params[i], mnemonic_params[i], strict);
 		boolean match = true;
-		for(boolean b:matches)
-			match = match && b;
+		for(int i=0;i<matches.length;i++)
+			match = match && matches[i];
 		if(!match) return null;
 		if(DEBUG) {
-			String matchingFormat = "";
+			StringBuilder matchingFormat = new StringBuilder();
 			for(int i=0;i<mnemonic_params.length;i++) {
 				int m = numberfyType(this.mnemonic_params[i]);
 				int s = isType(mnemonic_params[i])?numberfyType(mnemonic_params[i]):numberfyType(classifyValue(mnemonic_params[i]));
-				matchingFormat += maskToString(m)+" / "+maskToString(s)+" ; ";
+				matchingFormat.append(maskToString(m)+" / "+maskToString(s)+" ; ");
 			}
 			System.out.println(Arrays.toString(this.mnemonic_params) + " => "+mnemonic + " - "+Arrays.toString(mnemonic_params));
-			System.out.println("Matching: "+Arrays.toString(matches)+ " => "+matchingFormat);
+			System.out.println("Matching: "+Arrays.toString(matches)+ " => "+matchingFormat.toString());
 		}
 		byte[] output = new byte[16];
 		int outputIndex = 0;
-		if(this.prefix != null)
-			for(byte p:this.prefix) {
-				output[outputIndex] = (byte) p;
-				outputIndex++;
+		if(this.prefix != null) {
+			for(int i=0;i<this.prefix.length;i++)
+				output[outputIndex+i] = this.prefix[i];
+			outputIndex += this.prefix.length;
 			}
-		for(byte opc:this.opcode) {
-			output[outputIndex] = opc;
-			outputIndex++;
-		}
+		for(int i=0;i<this.opcode.length;i++)
+			output[outputIndex+i] = this.opcode[i];
+		outputIndex += this.opcode.length;
 		for(int i=0;i<this.opcode_params.length;i++) {
 			byte[] a = encodeParameter(opcode_params[i], mnemonic_params);
-			try {
+			if(a != null) {
 				System.arraycopy(a, 0, output, outputIndex, a.length);
-			}catch(NullPointerException e) {
+			}else {
 				if(DEBUG)
 				System.err.println("Failed at opcode_parameter "+opcode_params[i]+" in "+toString());
 				return null;

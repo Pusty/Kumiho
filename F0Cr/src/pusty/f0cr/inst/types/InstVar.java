@@ -26,7 +26,7 @@ public class InstVar extends Instruction {
 			input = true;
 			static_ = true;
 		}
-		poolIndex = (((data[0]&0xFF) << 8) + (data[1]&0xFF));
+		poolIndex = InstructionHandler.readShort(data, 0);
 	}
 	public boolean isLoad() {
 		return input;

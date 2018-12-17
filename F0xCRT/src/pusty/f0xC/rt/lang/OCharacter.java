@@ -5,6 +5,10 @@ import pusty.f0xC.lang.OverrideHandler.OverrideTranslation;
 //This class is super hacky because of ASCII strings
 @OverrideTranslation(override = "java/lang/Character")
 public class OCharacter {
+	
+	public static final int MIN_RADIX = 2;
+	public static final int MAX_RADIX = 36;
+	
 	private char value;
     public OCharacter(char value) {
         this.value = value;

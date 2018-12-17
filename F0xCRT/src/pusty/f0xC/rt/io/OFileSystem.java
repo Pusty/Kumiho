@@ -1,5 +1,7 @@
 package pusty.f0xC.rt.io;
 
+import java.io.IOException;
+
 import pusty.f0xC.lang.OverrideHandler.OverrideTranslation;
 
 @OverrideTranslation(override = "java/io/FileSystem")
@@ -38,8 +40,8 @@ public abstract class OFileSystem {
 //    public abstract long getLastModifiedTime(OFile f);
 //    public abstract long getLength(OFile f);
     
-//    public abstract boolean createFileExclusively(String pathname)
-//            throws IOException;
+    public abstract boolean createFileExclusively(String pathname)
+            throws IOException;
     public abstract boolean delete(OFile f);
 //    public abstract String[] list(OFile f);
 //    public abstract boolean createDirectory(OFile f);

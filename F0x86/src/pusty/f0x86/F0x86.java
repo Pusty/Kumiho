@@ -27,7 +27,10 @@ public class F0x86 {
 		try { reader.close(); }catch(Exception e){ e.printStackTrace(); }
 		instructions = arrayList.toArray(new Instruction[arrayList.size()]);
 	}
-	public Instruction assembleInst(String str) {
+	
+	
+	//Iterates over all possible encodings
+	public Instruction assembleInstFull(String str) {
 		ArrayList<Instruction> list_inst = new ArrayList<Instruction>();
 		ArrayList<Integer>     list_int  = new ArrayList<Integer>();
 		for(Instruction inst:instructions) {
@@ -62,12 +65,35 @@ public class F0x86 {
 		}
 		return list_inst.get(smallest);
 	}
+	
+	
+	//Stops after first possible encoding, still sucks and can be improved MASSIVLY by some smarty pants algorithm
+	public Instruction assembleInstLazy(String str) {
+		for(Instruction inst:instructions) {
+			try {
+				byte[] data_encode = inst.encode(str, false); //fetch instructions in strict mode
+				if(data_encode != null) {
+					return inst;
+				}
+			}catch(Exception e){e.printStackTrace();System.err.println(inst);System.err.println(str);System.exit(1);}
+		}
+		return null;
+	}
+	
+	
+	public Instruction assembleInst(String str) {
+		//System.out.println(str);
+		return assembleInstLazy(str);
+	}
+	
+	
 	public byte[] assemble(String str) {
 		return assembleInst(str).encode(str, false);
 	}
 	public String assembleHexString(String str) {
 		return assembleInst(str).encodeHexString(str);
 	}
+	
 	public String disassemble(byte[] data) {
 		if(data == null) return null;
 		for(Instruction inst:instructions) {
@@ -78,16 +104,44 @@ public class F0x86 {
 			}catch(Exception e){}
 		} return null;
 	}
-
 	
-	public static void main(String[] args) {
+	public String disassembleHexString(String str) {
+		if(str.length()%2 != 0) {
+			System.err.println("Can't work with odd length hex string");
+			return null;
+		}
+		if(str.length() == 0) {
+			System.err.println("Can't work with empty string");
+			return null;
+		}
+		byte[] data = new byte[str.length()/2];
+		for(int i=0;i<data.length;i++)
+			data[i] = (byte) Integer.parseInt(str.substring(i*2, i*2+2), 16);
+		return disassemble(data);
+	}
+	
+
+	public static void testParsingFile() {
 		F0x86 fox = new F0x86();
 		Assembler assembler = new Assembler(fox);
 		assembler.parseFile(new File("test.asm"));
-		assembler.processNodes(0x401000);	
+		assembler.processNodes(0x401000);
 		System.out.println(assembler.hexify());
-		//System.out.println(fox.assembleFile(new File("test.asm")));
-		//System.out.println(fox.assembleHexString("xchg [123], eax"));
-		//System.out.println(fox.disassemble(fox.assemble("xchg [123], eax")));
+	}
+	
+	public static void testAssembleLine() {
+		F0x86 fox = new F0x86();
+		System.out.println(fox.assembleHexString("xchg [123], eax"));
+	}
+	
+	public static void testDisassembleLine() {
+		F0x86 fox = new F0x86();
+		System.out.println(fox.disassembleHexString("c644484569"));
+	}
+	
+	public static void main(String[] args) {
+		testParsingFile();
+		testAssembleLine();
+		testDisassembleLine();
 	}
 }

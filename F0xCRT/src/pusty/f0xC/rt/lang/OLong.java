@@ -61,7 +61,7 @@ public class OLong extends ONumber {
         int radix = 1 << shift;
         long mask = radix - 1;
         do {
-            buf[--charPos] = OInteger.digits[(int)(i & mask)];
+            buf[--charPos] = OInteger.digits((int)(i & mask));
             i >>>= shift;
         } while (i != 0);
         return new String(buf, charPos, (64 - charPos));
@@ -73,11 +73,11 @@ public class OLong extends ONumber {
           throw new ONumberFormatException("null");
       }
 
-      if (radix < Character.MIN_RADIX) {
+      if (radix < OCharacter.MIN_RADIX) {
           throw new ONumberFormatException("radix " + radix +
                                           " less than Character.MIN_RADIX");
       }
-      if (radix > Character.MAX_RADIX) {
+      if (radix > OCharacter.MAX_RADIX) {
           throw new ONumberFormatException("radix " + radix +
                                           " greater than Character.MAX_RADIX");
       }
@@ -85,7 +85,7 @@ public class OLong extends ONumber {
       long result = 0;
       boolean negative = false;
       int i = 0, len = s.length();
-      long limit = -Long.MAX_VALUE;
+      long limit = -OLong.MAX_VALUE;
       long multmin;
       int digit;
 
@@ -151,8 +151,8 @@ public class OLong extends ONumber {
             // really: r = i - (q * 100);
             r = (int)(i - ((q << 6) + (q << 5) + (q << 2)));
             i = q;
-            buf[--charPos] = OInteger.DigitOnes[r];
-            buf[--charPos] = OInteger.DigitTens[r];
+            buf[--charPos] = OInteger.DigitOnes(r);
+            buf[--charPos] = OInteger.DigitTens(r);
         }
         // Get 2 digits/iteration using ints
         int q2;
@@ -162,15 +162,15 @@ public class OLong extends ONumber {
             // really: r = i2 - (q * 100);
             r = i2 - ((q2 << 6) + (q2 << 5) + (q2 << 2));
             i2 = q2;
-            buf[--charPos] = OInteger.DigitOnes[r];
-            buf[--charPos] = OInteger.DigitTens[r];
+            buf[--charPos] = OInteger.DigitOnes(r);
+            buf[--charPos] = OInteger.DigitTens(r);
         }
         // Fall thru to fast mode for smaller numbers
         // assert(i2 <= 65536, i2);
         for (;;) {
             q2 = (i2 * 52429) >>> (16+3);
             r = i2 - ((q2 << 3) + (q2 << 1));  // r = i2-(q2*10) ...
-            buf[--charPos] = OInteger.digits[r];
+            buf[--charPos] = OInteger.digits(r);
             i2 = q2;
             if (i2 == 0) break;
         }
@@ -204,10 +204,10 @@ public class OLong extends ONumber {
         }
 
         while (i <= -radix) {
-            buf[charPos--] = OInteger.digits[(int)(-(i % radix))];
+            buf[charPos--] = OInteger.digits((int)(-(i % radix)));
             i = i / radix;
         }
-        buf[charPos] = OInteger.digits[(int)(-i)];
+        buf[charPos] = OInteger.digits((int)(-i));
 
         if (negative) {
             buf[--charPos] = '-';

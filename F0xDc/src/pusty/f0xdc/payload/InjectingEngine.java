@@ -179,8 +179,8 @@ public class InjectingEngine {
 			MemorySection sec, Address find, String lib, String proc) {
 		if(annoyingDirectMessage)
 			System.out.println("[#] Direct needs to be run on Windows Target");
-		if (!System.getProperty("os.name").contains("Win"))
-			System.out.println("[!] Windows not found! Trying to run anyways.");
+		//if (!System.getProperty("os.name").contains("Win"))
+		//	System.out.println("[!] Windows not found! Trying to run anyways.");
 		for (int i = 0; i < payload.getSize(); i++) {
 			try {
 				if(reader.getStream().getInt(sec.getOffsetFrom() + i)==find.getAddr32()) {
@@ -232,6 +232,8 @@ public class InjectingEngine {
 			System.out.println("[!] Didn't find Replace Address!");
 		return false;
 	}
+	
+	
 	/**
 	 * Searches for the 32bit integer "find" within the section and replaces it with "replace" if found
 	 * @param reader the mapped binary
@@ -413,7 +415,9 @@ public class InjectingEngine {
 	 * @return the aligned value
 	 */
 	public static int align(int value, int alignment) {
-		 return (((int)Math.ceil(((float)value) / ((float)alignment))) * alignment);
+		
+		 return (((value / alignment)+(value%alignment==0?0:1)) * alignment);
+		// return (((int)Math.ceil(((float)value) / ((float)alignment))) * alignment);
 	}
 	
 	public static int createImportTable(ExecutableReader reader, int position) {
@@ -618,6 +622,7 @@ public class InjectingEngine {
 	 * <br>NOTE: NOT THREAD SAFE
 	 * <br>ANOTHER NOTE: (TODO) HOLY FUCK THIS IS SLOOOOOOOW
 	 * <br>WARNING: DIDN'T WORK FOR 64bit (TODO)
+	 * <br>THIS IS ONLY EVEN REMOTLY FEASABLE BECAUSE OF JAVA-VM OPTIMIZATION MAGIC
 	 * @param reader the binary to read from
 	 * @param newTable the offset of the new import table
 	 */

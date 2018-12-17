@@ -369,13 +369,6 @@ public class OString implements OCharSequence {
         return this;
     }
     
-    public OString toLowerCase() {
-    	char[] newStr = new char[value.length];
-    	for(int i=0;i<value.length;i++)
-    		newStr[i] = OCharacter.toLowerCase(value[i]);
-    	return new OString(newStr);
-    }
-    
     public boolean contains(OString s) {
         return indexOf(s) > -1;
     }
@@ -391,8 +384,8 @@ public class OString implements OCharSequence {
         char pa[] = other.value;
         int po = ooffset;
         if ((ooffset < 0) || (toffset < 0)
-                || (toffset > (long)value.length - len)
-                || (ooffset > (long)other.value.length - len)) {
+                || (toffset > value.length - len)
+                || (ooffset > other.value.length - len)) {
             return false;
         }
         while (len-- > 0) {
@@ -423,11 +416,18 @@ public class OString implements OCharSequence {
                 && regionMatches(true, 0, anotherString, 0, value.length);
     }
     
-    public boolean equals(OString anotherString) {
-        return (this == anotherString) ? true
-                : (anotherString != null)
-                && (anotherString.value.length == value.length)
-                && regionMatches(false, 0, anotherString, 0, value.length);
+    public boolean equals(Object anObject) {
+    	if(anObject == null) return false;
+        if (this == anObject)
+            return true;
+        if (anObject instanceof String) {
+        	OString anotherString = (OString)anObject;
+	        return (this == anotherString) ? true
+	                : (anotherString != null)
+	                && (anotherString.value.length == value.length)
+	                && regionMatches(false, 0, anotherString, 0, value.length);
+        }
+        return false;
     }
     
     public OString trim() {
@@ -553,5 +553,19 @@ public class OString implements OCharSequence {
         return -1;
     }
 
+    
+    public String toLowerCase() {
+        char[] array = new char[value.length];
+        for(int i=0;i<value.length;i++)
+     	   array[i] = Character.toLowerCase(charAt(i));
+        return new String(array);
+     }
+    
+    public String toUpperCase() {
+       char[] array = new char[value.length];
+       for(int i=0;i<value.length;i++)
+    	   array[i] = Character.toUpperCase(charAt(i));
+       return new String(array);
+    }
 
 }
